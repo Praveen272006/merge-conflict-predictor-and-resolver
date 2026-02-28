@@ -4,6 +4,7 @@ from api.github_bot import post_commit_comment
 from model.explainer import explain_risk
 from model.line_analyzer import detect_risky_lines
 from auto_resolver.resolver import resolve_whitespace
+from api.github_fetcher import get_commit_changes
 # =====================================================
 # CREATE FASTAPI APP
 # =====================================================
@@ -58,13 +59,15 @@ async def github_webhook(request: Request):
     commits = payload.get("commits", [])
 
     # ---------- FEATURE EXTRACTION ----------
-    files_changed = len(commits)
+files_changed = 0
+total_changes = 0
 
-    total_changes = sum(
-        len(c.get("added", [])) +
-        len(c.get("removed", []))
-        for c in commits
-    )
+for commit in commits:
+    sha = commit["id"]
+    f, c = get_commit_changes(repo_name, sha)
+
+    files_changed += f
+    total_changes += c
 
     ratio = 1.0
     large_change = 1 if total_changes > 200 else 0
