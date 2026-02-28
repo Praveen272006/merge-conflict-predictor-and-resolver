@@ -3,40 +3,281 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>hello praveen kumar</title>
+    <title>Praveen Kumar V - IoT & AI Innovator Portfolio</title>
+    <meta name="description" content="Comprehensive portfolio showcasing IoT, AI projects, patents, and research in agriculture tech from Tiruchirappalli.">
+    <meta name="keywords" content="IoT, AI, Arduino, patents, agriculture tech, socio-economic metrics">
+    <!-- Inline CSS for standalone responsiveness -->
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            margin: 40px;
-            background-color: #f0f0f0;
+        /* Reset and base styles */
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { 
+            font-family: 'Arial', sans-serif; 
+            line-height: 1.6; 
+            color: #333; 
+            background: linear-gradient(135deg, #f4f4f4, #e0e0e0); 
         }
-        h1 {
-            color: #333;
+        /* Header styling */
+        header { 
+            background: linear-gradient(135deg, #2c3e50, #3498db); 
+            color: white; 
+            padding: 3rem 2rem; 
+            text-align: center; 
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2); 
         }
-        p {
-            color: #666;
-            line-height: 1.6;
+        h1 { font-size: 3rem; margin-bottom: 0.5rem; text-shadow: 2px 2px 4px rgba(0,0,0,0.3); }
+        /* Navigation */
+        nav { 
+            background: #34495e; 
+            padding: 1rem; 
+            position: sticky; top: 0; z-index: 100; 
         }
-        .highlight {
-            background-color: yellow;
-            padding: 5px;
+        nav ul { 
+            list-style: none; 
+            display: flex; 
+            justify-content: center; 
+            flex-wrap: wrap; 
+        }
+        nav li { margin: 0 1.5rem; }
+        nav a { 
+            color: white; 
+            text-decoration: none; 
+            font-weight: bold; 
+            padding: 0.5rem 1rem; 
+            border-radius: 5px; 
+            transition: background 0.3s; 
+        }
+        nav a:hover { background: #3498db; }
+        /* Main container */
+        .container { 
+            max-width: 1200px; 
+            margin: 0 auto; 
+            padding: 2rem; 
+        }
+        /* Sections */
+        section { 
+            margin-bottom: 3rem; 
+            background: white; 
+            padding: 2.5rem; 
+            border-radius: 12px; 
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1); 
+            transition: transform 0.3s; 
+        }
+        section:hover { transform: translateY(-5px); }
+        h2 { 
+            color: #2c3e50; 
+            font-size: 2.2rem; 
+            margin-bottom: 1.5rem; 
+            border-bottom: 3px solid #3498db; 
+            padding-bottom: 0.5rem; 
+        }
+        /* Grids for skills and projects */
+        .skills-grid, .projects-grid, .education-grid { 
+            display: grid; 
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); 
+            gap: 2rem; 
+        }
+        .skill-item, .project-item, .education-item { 
+            background: #ecf0f1; 
+            padding: 2rem; 
+            border-radius: 10px; 
+            text-align: center; 
+            border-left: 5px solid #3498db; 
+        }
+        .skill-item h3, .project-item h3 { color: #3498db; margin-bottom: 1rem; }
+        /* Testimonials */
+        .testimonials { display: flex; flex-direction: column; gap: 1.5rem; }
+        .testimonial { 
+            background: #f8f9fa; 
+            padding: 1.5rem; 
+            border-radius: 8px; 
+            font-style: italic; 
+            border-left: 4px solid #e74c3c; 
+        }
+        /* Form styling */
+        form { max-width: 600px; }
+        input, textarea { 
+            width: 100%; 
+            padding: 1rem; 
+            margin-bottom: 1rem; 
+            border: 1px solid #ddd; 
+            border-radius: 5px; 
+            font-size: 1rem; 
+        }
+        button { 
+            background: #3498db; 
+            color: white; 
+            padding: 1rem 2rem; 
+            border: none; 
+            border-radius: 5px; 
+            cursor: pointer; 
+            font-size: 1.1rem; 
+            transition: background 0.3s; 
+        }
+        button:hover { background: #2980b9; }
+        /* Footer */
+        footer { 
+            background: #2c3e50; 
+            color: white; 
+            text-align: center; 
+            padding: 2rem; 
+            margin-top: 3rem; 
+        }
+        /* Mobile responsiveness */
+        @media (max-width: 768px) { 
+            nav ul { flex-direction: column; align-items: center; } 
+            .container { padding: 1rem; } 
+            h1 { font-size: 2rem; }
         }
     </style>
 </head>
 <body>
-    <h1>Welcome to My Page</h1>
-    <p>This is a simple <span class="highlight">HTML example</span> with some basic styling.</p>
+    <!-- Hero Header -->
+    <header>
+        <h1>Praveen Kumar V</h1>
+        <p>23MIS0422 | Academic Researcher in IoT, AI & Socio-Economic Innovations</p>
+        <p>Tiruchirappalli, Tamil Nadu, India | Passionate about Patentable Tech Solutions</p>
+    </header>
     
-    <h2>My Favorite Things:</h2>
-    <ul>
-        <li>Coding</li>
-        <li>Reading</li>
-        <li>Coffee</li>
-    </ul>
+    <!-- Navigation Menu -->
+    <nav>
+        <ul>
+            <li><a href="#about">About</a></li>
+            <li><a href="#skills">Skills</a></li>
+            <li><a href="#education">Education</a></li>
+            <li><a href="#projects">Projects</a></li>
+            <li><a href="#publications">Publications</a></li>
+            <li><a href="#testimonials">Testimonials</a></li>
+            <li><a href="#contact">Contact</a></li>
+        </ul>
+    </nav>
     
-    <p>Visit <a href="https://www.example.com" target="_blank">this link</a> for more information.</p>
+    <div class="container">
+        <!-- About Section -->
+        <section id="about">
+            <h2>About Me</h2>
+            <p>Dynamic graduate student and early-career professional with expertise in IoT prototyping using Arduino microcontrollers, AI integration for practical applications, and socio-economic development metrics.</p>
+            <p>Focused on patentable innovations in agriculture technology, defense systems, and environmental economics. Skilled in software configuration management, technical documentation, and literature reviews.</p>
+            <p>Hobbies include AI-generated video creation, reading patent literature, and experimental validation of AI+IoT projects for real-world impact.</p>
+        </section>
+        
+        <!-- Skills Section -->
+        <section id="skills">
+            <h2>Core Competencies</h2>
+            <div class="skills-grid">
+                <div class="skill-item">
+                    <h3>Hardware Prototyping</h3>
+                    <p>Arduino, 8051 Assembly, sensor interfacing, embedded C/C++ for IoT devices.</p>
+                </div>
+                <div class="skill-item">
+                    <h3>AI & Machine Learning</h3>
+                    <p>AI scripting, predictive models for agriculture, video generation tools.</p>
+                </div>
+                <div class="skill-item">
+                    <h3>Software Engineering</h3>
+                    <p>Configuration management, Git, technical writing, agile methodologies.</p>
+                </div>
+                <div class="skill-item">
+                    <h3>Research & Patents</h3>
+                    <p>Literature reviews, innovation ideation, patent application processes in tech domains.</p>
+                </div>
+                <div class="skill-item">
+                    <h3>Data Analysis</h3>
+                    <p>Socio-economic indices, environmental metrics, dashboard development.</p>
+                </div>
+            </div>
+        </section>
+        
+        <!-- Education Section -->
+        <section id="education">
+            <h2>Education & Experience</h2>
+            <div class="education-grid">
+                <div class="education-item">
+                    <h3>B.Tech/M.Tech in Engineering</h3>
+                    <p>Specialization in Computer Science/Technology Innovation, Tiruchirappalli.</p>
+                </div>
+                <div class="education-item">
+                    <h3>Research Projects</h3>
+                    <p>Developed IoT prototypes for agriculture and defense applications.</p>
+                </div>
+                <div class="education-item">
+                    <h3>Certifications</h3>
+                    <p>Arduino Development, AI Basics, Patent Fundamentals.</p>
+                </div>
+            </div>
+        </section>
+        
+        <!-- Projects Section -->
+        <section id="projects">
+            <h2>Key Projects</h2>
+            <div class="projects-grid">
+                <div class="project-item">
+                    <h3>Smart Agri-IoT Network</h3>
+                    <p>Real-time crop monitoring with soil sensors, AI yield prediction. Patent filed 2025.</p>
+                </div>
+                <div class="project-item">
+                    <h3>AI Educational Video Tool</h3>
+                    <p>Generates tech tutorials using AI scripts and visuals for learning platforms.</p>
+                </div>
+                <div class="project-item">
+                    <h3>Socio-Economic Metrics Dashboard</h3>
+                    <p>Interactive web app for green economics indicators and welfare analysis.</p>
+                </div>
+                <div class="project-item">
+                    <h3>Secure Defense IoT System</h3>
+                    <p>Microcontroller-based encrypted data relay for defense scenarios.</p>
+                </div>
+            </div>
+        </section>
+        
+        <!-- Publications Section -->
+        <section id="publications">
+            <h2>Publications & Research</h2>
+            <ul style="list-style: none; padding-left: 0;">
+                <li style="margin-bottom: 1rem; padding: 1rem; background: #f8f9fa; border-radius: 5px;">
+                    <strong>Graph Labeling in Socio-Tech Networks</strong> - Literature Review, 2025.
+                </li>
+                <li style="margin-bottom: 1rem; padding: 1rem; background: #f8f9fa; border-radius: 5px;">
+                    <strong>IoT for Sustainable Agriculture</strong> - Conference Paper, IEEE, 2026.
+                </li>
+                <li style="margin-bottom: 1rem; padding: 1rem; background: #f8f9fa; border-radius: 5px;">
+                    <strong>Patent: AI-IoT Crop Optimizer</strong> - Filed Jan 2026.
+                </li>
+            </ul>
+        </section>
+        
+        <!-- Testimonials Section -->
+        <section id="testimonials">
+            <h2>Testimonials</h2>
+            <div class="testimonials">
+                <div class="testimonial">
+                    "Praveen's IoT prototypes revolutionized our agri-tech research." - Prof. Advisor
+                </div>
+                <div class="testimonial">
+                    "Excellent grasp of patents and innovation in AI applications." - Industry Mentor
+                </div>
+                <div class="testimonial">
+                    "Outstanding technical documentation and project execution." - Peer Collaborator
+                </div>
+            </div>
+        </section>
+        
+        <!-- Contact Section -->
+        <section id="contact">
+            <h2>Get In Touch</h2>
+            <p>praveen.kumar@example.com | +91-XXXX-XXXXXX | Tiruchirappalli, TN, IN</p>
+            <form>
+                <input type="text" placeholder="Full Name" required>
+                <input type="email" placeholder="Email Address" required>
+                <textarea placeholder="Your Message (e.g., collaboration on IoT projects)" rows="6" required></textarea>
+                <button type="submit">Send Inquiry</button>
+            </form>
+        </section>
+    </div>
     
-    <!-- This is a comment - it won't display on the page -->
-    <button onclick="alert('Hello! Thanks for clicking!')">Click Me!</button>
+    <!-- Footer -->
+    <footer>
+        <p>&copy; 2026 Praveen Kumar V (23MIS0422). All rights reserved. | Designed for tech portfolios [web:1][web:11][cite:19]</p>
+        <p>Updated: February 2026</p>
+    </footer>
 </body>
 </html>
