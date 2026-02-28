@@ -5,6 +5,7 @@ from model.explainer import explain_risk
 from model.line_analyzer import detect_risky_lines
 from auto_resolver.resolver import resolve_whitespace
 from api.github_fetcher import get_commit_changes
+
 # =====================================================
 # CREATE FASTAPI APP
 # =====================================================
@@ -55,19 +56,20 @@ async def github_webhook(request: Request):
 
     payload = await request.json()
 
-    repo_name = payload.get("repository", {}).get("full_name", "unknown/repo")
+    repo_name = payload.get("repository", {}).get("full_name")
     commits = payload.get("commits", [])
 
     # ---------- FEATURE EXTRACTION ----------
-files_changed = 0
-total_changes = 0
+    files_changed = 0
+    total_changes = 0
 
-for commit in commits:
-    sha = commit["id"]
-    f, c = get_commit_changes(repo_name, sha)
+    # ✅ collect ALL commit stats first
+    for commit in commits:
+        sha = commit["id"]
+        f, c = get_commit_changes(repo_name, sha)
 
-    files_changed += f
-    total_changes += c
+        files_changed += f
+        total_changes += c
 
     ratio = 1.0
     large_change = 1 if total_changes > 200 else 0
@@ -119,12 +121,10 @@ for commit in commits:
             sample_code = "print('hello')    \nprint('world')    "
             cleaned_code = resolve_whitespace(sample_code)
 
-            auto_fix_message = f"""
+            auto_fix_message = """
 ---
 ### ⚡ Auto Resolver Triggered
 Whitespace cleanup applied automatically.
-
-Preview:
 """
 
             print("Auto-fixed preview:\n", cleaned_code)
@@ -184,5 +184,4 @@ def home():
     return {
         "status": "running",
         "service": "AI Merge Conflict Predictor",
-        "author": "Praveen Kumar"
     }
