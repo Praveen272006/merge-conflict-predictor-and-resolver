@@ -1,6 +1,7 @@
 from fastapi import FastAPI, Request
 from model.risk_engine import predict_risk
 from api.github_bot import post_commit_comment
+from model.explainer import explain_risk
 
 # ✅ create app FIRST
 app = FastAPI()
@@ -54,12 +55,20 @@ async def github_webhook(request: Request):
     merge = 1
 
     prob, level = predict_risk(
+        
         files_changed,
         total_changes,
         ratio,
         large_change,
         multi_file,
         merge
+    )
+    reasons = explain_risk({
+    "files_changed": files_changed,
+    "total_changes": total_changes,
+    "multi_file_change": multi_file,
+    "merge_activity": merge
+    }
     )
 
     # 🤖 COMMENT MESSAGE
