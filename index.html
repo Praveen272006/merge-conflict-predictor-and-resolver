@@ -3,385 +3,281 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Space Invaders - Praveen Kumar V</title>
+    <title>Praveen Kumar V - IoT & AI Innovator Portfolio</title>
+    <meta name="description" content="Comprehensive portfolio showcasing IoT, AI projects, patents, and research in agriculture tech from Tiruchirappalli.">
+    <meta name="keywords" content="IoT, AI, Arduino, patents, agriculture tech, socio-economic metrics">
+    <!-- Inline CSS for standalone responsiveness -->
     <style>
+        /* Reset and base styles */
+        * { margin: 0; padding: 0; box-sizing: border-box; }
         body { 
-            margin: 0; padding: 20px; 
-            background: #000; 
-            color: #0f0; 
-            font-family: 'Courier New', monospace; 
-            display: flex; 
-            flex-direction: column; 
-            align-items: center; 
-            min-height: 100vh; 
-        }
-        canvas { 
-            border: 3px solid #0f0; 
-            background: #111; 
-            box-shadow: 0 0 20px #0f0; 
-        }
-        .controls { 
-            margin: 20px 0; 
-            text-align: center; 
-        }
-        .score { 
-            font-size: 24px; 
-            font-weight: bold; 
-            margin: 10px 0; 
-        }
-        .instructions { 
-            text-align: center; 
-            max-width: 600px; 
+            font-family: 'Arial', sans-serif; 
             line-height: 1.6; 
-            margin-top: 20px; 
+            color: #333; 
+            background: linear-gradient(135deg, #f4f4f4, #e0e0e0); 
         }
-        button { 
-            background: #0f0; 
-            color: #000; 
-            border: none; 
-            padding: 15px 30px; 
-            font-size: 18px; 
-            font-family: inherit; 
-            cursor: pointer; 
+        /* Header styling */
+        header { 
+            background: linear-gradient(135deg, #2c3e50, #3498db); 
+            color: white; 
+            padding: 3rem 2rem; 
+            text-align: center; 
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2); 
+        }
+        h1 { font-size: 3rem; margin-bottom: 0.5rem; text-shadow: 2px 2px 4px rgba(0,0,0,0.3); }
+        /* Navigation */
+        nav { 
+            background: #34495e; 
+            padding: 1rem; 
+            position: sticky; top: 0; z-index: 100; 
+        }
+        nav ul { 
+            list-style: none; 
+            display: flex; 
+            justify-content: center; 
+            flex-wrap: wrap; 
+        }
+        nav li { margin: 0 1.5rem; }
+        nav a { 
+            color: white; 
+            text-decoration: none; 
+            font-weight: bold; 
+            padding: 0.5rem 1rem; 
             border-radius: 5px; 
-            margin: 0 10px; 
+            transition: background 0.3s; 
         }
-        button:hover { background: #0a0; }
-        .game-over { 
-            position: absolute; 
-            top: 50%; 
-            left: 50%; 
-            transform: translate(-50%, -50%); 
-            background: rgba(0,0,0,0.9); 
-            color: #f00; 
-            padding: 30px; 
-            border: 2px solid #f00; 
+        nav a:hover { background: #3498db; }
+        /* Main container */
+        .container { 
+            max-width: 1200px; 
+            margin: 0 auto; 
+            padding: 2rem; 
+        }
+        /* Sections */
+        section { 
+            margin-bottom: 3rem; 
+            background: white; 
+            padding: 2.5rem; 
+            border-radius: 12px; 
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1); 
+            transition: transform 0.3s; 
+        }
+        section:hover { transform: translateY(-5px); }
+        h2 { 
+            color: #2c3e50; 
+            font-size: 2.2rem; 
+            margin-bottom: 1.5rem; 
+            border-bottom: 3px solid #3498db; 
+            padding-bottom: 0.5rem; 
+        }
+        /* Grids for skills and projects */
+        .skills-grid, .projects-grid, .education-grid { 
+            display: grid; 
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); 
+            gap: 2rem; 
+        }
+        .skill-item, .project-item, .education-item { 
+            background: #ecf0f1; 
+            padding: 2rem; 
             border-radius: 10px; 
             text-align: center; 
-            display: none; 
+            border-left: 5px solid #3498db; 
+        }
+        .skill-item h3, .project-item h3 { color: #3498db; margin-bottom: 1rem; }
+        /* Testimonials */
+        .testimonials { display: flex; flex-direction: column; gap: 1.5rem; }
+        .testimonial { 
+            background: #f8f9fa; 
+            padding: 1.5rem; 
+            border-radius: 8px; 
+            font-style: italic; 
+            border-left: 4px solid #e74c3c; 
+        }
+        /* Form styling */
+        form { max-width: 600px; }
+        input, textarea { 
+            width: 100%; 
+            padding: 1rem; 
+            margin-bottom: 1rem; 
+            border: 1px solid #ddd; 
+            border-radius: 5px; 
+            font-size: 1rem; 
+        }
+        button { 
+            background: #3498db; 
+            color: white; 
+            padding: 1rem 2rem; 
+            border: none; 
+            border-radius: 5px; 
+            cursor: pointer; 
+            font-size: 1.1rem; 
+            transition: background 0.3s; 
+        }
+        button:hover { background: #2980b9; }
+        /* Footer */
+        footer { 
+            background: #2c3e50; 
+            color: white; 
+            text-align: center; 
+            padding: 2rem; 
+            margin-top: 3rem; 
+        }
+        /* Mobile responsiveness */
+        @media (max-width: 768px) { 
+            nav ul { flex-direction: column; align-items: center; } 
+            .container { padding: 1rem; } 
+            h1 { font-size: 2rem; }
         }
     </style>
 </head>
 <body>
-    <h1>🚀 SPACE INVADERS 🚀</h1>
-    <p>Praveen Kumar V - 23MIS0422 - Full JS Game (300 Lines)</p>
+    <!-- Hero Header -->
+    <header>
+        <h1>Praveen Kumar V</h1>
+        <p>23MIS0422 | Academic Researcher in IoT, AI & Socio-Economic Innovations</p>
+        <p>Tiruchirappalli, Tamil Nadu, India | Passionate about Patentable Tech Solutions</p>
+    </header>
     
-    <div class="score">
-        Score: <span id="score">0</span> | Lives: <span id="lives">3</span> | Level: <span id="level">1</span>
+    <!-- Navigation Menu -->
+    <nav>
+        <ul>
+            <li><a href="#about">About</a></li>
+            <li><a href="#skills">Skills</a></li>
+            <li><a href="#education">Education</a></li>
+            <li><a href="#projects">Projects</a></li>
+            <li><a href="#publications">Publications</a></li>
+            <li><a href="#testimonials">Testimonials</a></li>
+            <li><a href="#contact">Contact</a></li>
+        </ul>
+    </nav>
+    
+    <div class="container">
+        <!-- About Section -->
+        <section id="about">
+            <h2>About Me</h2>
+            <p>Dynamic graduate student and early-career professional with expertise in IoT prototyping using Arduino microcontrollers, AI integration for practical applications, and socio-economic development metrics.</p>
+            <p>Focused on patentable innovations in agriculture technology, defense systems, and environmental economics. Skilled in software configuration management, technical documentation, and literature reviews.</p>
+            <p>Hobbies include AI-generated video creation, reading patent literature, and experimental validation of AI+IoT projects for real-world impact.</p>
+        </section>
+        
+        <!-- Skills Section -->
+        <section id="skills">
+            <h2>Core Competencies</h2>
+            <div class="skills-grid">
+                <div class="skill-item">
+                    <h3>Hardware Prototyping</h3>
+                    <p>Arduino, 8051 Assembly, sensor interfacing, embedded C/C++ for IoT devices.</p>
+                </div>
+                <div class="skill-item">
+                    <h3>AI & Machine Learning</h3>
+                    <p>AI scripting, predictive models for agriculture, video generation tools.</p>
+                </div>
+                <div class="skill-item">
+                    <h3>Software Engineering</h3>
+                    <p>Configuration management, Git, technical writing, agile methodologies.</p>
+                </div>
+                <div class="skill-item">
+                    <h3>Research & Patents</h3>
+                    <p>Literature reviews, innovation ideation, patent application processes in tech domains.</p>
+                </div>
+                <div class="skill-item">
+                    <h3>Data Analysis</h3>
+                    <p>Socio-economic indices, environmental metrics, dashboard development.</p>
+                </div>
+            </div>
+        </section>
+        
+        <!-- Education Section -->
+        <section id="education">
+            <h2>Education & Experience</h2>
+            <div class="education-grid">
+                <div class="education-item">
+                    <h3>B.Tech/M.Tech in Engineering</h3>
+                    <p>Specialization in Computer Science/Technology Innovation, Tiruchirappalli.</p>
+                </div>
+                <div class="education-item">
+                    <h3>Research Projects</h3>
+                    <p>Developed IoT prototypes for agriculture and defense applications.</p>
+                </div>
+                <div class="education-item">
+                    <h3>Certifications</h3>
+                    <p>Arduino Development, AI Basics, Patent Fundamentals.</p>
+                </div>
+            </div>
+        </section>
+        
+        <!-- Projects Section -->
+        <section id="projects">
+            <h2>Key Projects</h2>
+            <div class="projects-grid">
+                <div class="project-item">
+                    <h3>Smart Agri-IoT Network</h3>
+                    <p>Real-time crop monitoring with soil sensors, AI yield prediction. Patent filed 2025.</p>
+                </div>
+                <div class="project-item">
+                    <h3>AI Educational Video Tool</h3>
+                    <p>Generates tech tutorials using AI scripts and visuals for learning platforms.</p>
+                </div>
+                <div class="project-item">
+                    <h3>Socio-Economic Metrics Dashboard</h3>
+                    <p>Interactive web app for green economics indicators and welfare analysis.</p>
+                </div>
+                <div class="project-item">
+                    <h3>Secure Defense IoT System</h3>
+                    <p>Microcontroller-based encrypted data relay for defense scenarios.</p>
+                </div>
+            </div>
+        </section>
+        
+        <!-- Publications Section -->
+        <section id="publications">
+            <h2>Publications & Research</h2>
+            <ul style="list-style: none; padding-left: 0;">
+                <li style="margin-bottom: 1rem; padding: 1rem; background: #f8f9fa; border-radius: 5px;">
+                    <strong>Graph Labeling in Socio-Tech Networks</strong> - Literature Review, 2025.
+                </li>
+                <li style="margin-bottom: 1rem; padding: 1rem; background: #f8f9fa; border-radius: 5px;">
+                    <strong>IoT for Sustainable Agriculture</strong> - Conference Paper, IEEE, 2026.
+                </li>
+                <li style="margin-bottom: 1rem; padding: 1rem; background: #f8f9fa; border-radius: 5px;">
+                    <strong>Patent: AI-IoT Crop Optimizer</strong> - Filed Jan 2026.
+                </li>
+            </ul>
+        </section>
+        
+        <!-- Testimonials Section -->
+        <section id="testimonials">
+            <h2>Testimonials</h2>
+            <div class="testimonials">
+                <div class="testimonial">
+                    "Praveen's IoT prototypes revolutionized our agri-tech research." - Prof. Advisor
+                </div>
+                <div class="testimonial">
+                    "Excellent grasp of patents and innovation in AI applications." - Industry Mentor
+                </div>
+                <div class="testimonial">
+                    "Outstanding technical documentation and project execution." - Peer Collaborator
+                </div>
+            </div>
+        </section>
+        
+        <!-- Contact Section -->
+        <section id="contact">
+            <h2>Get In Touch</h2>
+            <p>praveen.kumar@example.com | +91-XXXX-XXXXXX | Tiruchirappalli, TN, IN</p>
+            <form>
+                <input type="text" placeholder="Full Name" required>
+                <input type="email" placeholder="Email Address" required>
+                <textarea placeholder="Your Message (e.g., collaboration on IoT projects)" rows="6" required></textarea>
+                <button type="submit">Send Inquiry</button>
+            </form>
+        </section>
     </div>
     
-    <canvas id="gameCanvas" width="800" height="600"></canvas>
-    
-    <div class="controls">
-        <button onclick="startGame()">Start Game</button>
-        <button onclick="pauseGame()">Pause</button>
-        <button onclick="resetGame()">Reset</button>
-    </div>
-    
-    <div class="instructions">
-        <strong>Controls:</strong> A/D or ←/→ Arrow Keys (Move) | SPACEBAR (Shoot) | 
-        Survive waves of invaders! Clear all enemies to advance levels.
-    </div>
-    
-    <div class="game-over" id="gameOver">
-        <h2>GAME OVER</h2>
-        <p>Final Score: <span id="finalScore">0</span></p>
-        <button onclick="resetGame()">Play Again</button>
-    </div>
-
-    <script>
-        const canvas = document.getElementById('gameCanvas');
-        const ctx = canvas.getContext('2d');
-        const scoreEl = document.getElementById('score');
-        const livesEl = document.getElementById('lives');
-        const levelEl = document.getElementById('level');
-        const gameOverEl = document.getElementById('gameOver');
-        const finalScoreEl = document.getElementById('finalScore');
-        
-        // Game state
-        let gameRunning = false;
-        let gamePaused = false;
-        let score = 0;
-        let lives = 3;
-        let level = 1;
-        let keys = {};
-        
-        // Player object
-        const player = {
-            x: canvas.width / 2 - 25,
-            y: canvas.height - 80,
-            width: 50,
-            height: 30,
-            speed: 5,
-            bullets: []
-        };
-        
-        // Enemy arrays
-        let enemies = [];
-        let enemyBullets = [];
-        let particles = [];
-        
-        // Game initialization
-        function init() {
-            enemies = [];
-            enemyBullets = [];
-            player.bullets = [];
-            createEnemyWave();
-            gameRunning = true;
-            gamePaused = false;
-            gameLoop();
-        }
-        
-        // Create enemy formation
-        function createEnemyWave() {
-            const rows = 5;
-            const cols = 10;
-            const spacing = 60;
-            const startX = 100;
-            const startY = 50;
-            
-            for (let row = 0; row < rows; row++) {
-                for (let col = 0; col < cols; col++) {
-                    enemies.push({
-                        x: startX + col * spacing,
-                        y: startY + row * 40,
-                        width: 40,
-                        height: 30,
-                        speed: 0.5 + level * 0.2,
-                        direction: 1,
-                        health: 1,
-                        lastShot: 0
-                    });
-                }
-            }
-        }
-        
-        // Input handling
-        document.addEventListener('keydown', (e) => {
-            keys[e.code] = true;
-            if (e.code === 'Space') {
-                e.preventDefault();
-                shoot();
-            }
-        });
-        
-        document.addEventListener('keyup', (e) => {
-            keys[e.code] = false;
-        });
-        
-        // Player shooting
-        function shoot() {
-            if (player.bullets.length < 1) {
-                player.bullets.push({
-                    x: player.x + player.width / 2 - 2,
-                    y: player.y,
-                    width: 4,
-                    height: 12,
-                    speed: 8
-                });
-            }
-        }
-        
-        // Update game objects
-        function update() {
-            if (!gameRunning || gamePaused) return;
-            
-            // Player movement
-            if (keys['KeyA'] || keys['ArrowLeft']) {
-                player.x = Math.max(0, player.x - player.speed);
-            }
-            if (keys['KeyD'] || keys['ArrowRight']) {
-                player.x = Math.min(canvas.width - player.width, player.x + player.speed);
-            }
-            
-            // Update player bullets
-            for (let i = player.bullets.length - 1; i >= 0; i--) {
-                const bullet = player.bullets[i];
-                bullet.y -= bullet.speed;
-                if (bullet.y < 0) {
-                    player.bullets.splice(i, 1);
-                }
-            }
-            
-            // Update enemies
-            for (let i = enemies.length - 1; i >= 0; i--) {
-                const enemy = enemies[i];
-                enemy.x += enemy.speed * enemy.direction;
-                
-                // Enemy edge collision
-                if (enemy.x <= 20 || enemy.x >= canvas.width - enemy.width - 20) {
-                    enemies.forEach(e => e.direction *= -1);
-                    enemies.forEach(e => e.y += 20);
-                }
-                
-                // Enemy shooting (random)
-                if (Math.random() < 0.005 + level * 0.001 && Date.now() - enemy.lastShot > 1000) {
-                    enemyBullets.push({
-                        x: enemy.x + enemy.width / 2 - 2,
-                        y: enemy.y + enemy.height,
-                        width: 4,
-                        height: 8,
-                        speed: 3
-                    });
-                    enemy.lastShot = Date.now();
-                }
-                
-                // Check player bullet collision
-                for (let j = player.bullets.length - 1; j >= 0; j--) {
-                    const bullet = player.bullets[j];
-                    if (bullet.x < enemy.x + enemy.width &&
-                        bullet.x + bullet.width > enemy.x &&
-                        bullet.y < enemy.y + enemy.height &&
-                        bullet.y + bullet.height > enemy.y) {
-                        player.bullets.splice(j, 1);
-                        enemy.health--;
-                        createExplosion(enemy.x, enemy.y);
-                        if (enemy.health <= 0) {
-                            enemies.splice(i, 1);
-                            score += 10 * level;
-                        }
-                        break;
-                    }
-                }
-            }
-            
-            // Update enemy bullets
-            for (let i = enemyBullets.length - 1; i >= 0; i--) {
-                const bullet = enemyBullets[i];
-                bullet.y += bullet.speed;
-                if (bullet.y > canvas.height) {
-                    enemyBullets.splice(i, 1);
-                }
-                
-                // Player collision
-                if (bullet.x < player.x + player.width &&
-                    bullet.x + bullet.width > player.x &&
-                    bullet.y < player.y + player.height &&
-                    bullet.y + bullet.height > player.y) {
-                    enemyBullets.splice(i, 1);
-                    lives--;
-                    createExplosion(player.x, player.y);
-                }
-            }
-            
-            // Update particles
-            for (let i = particles.length - 1; i >= 0; i--) {
-                const p = particles[i];
-                p.x += p.vx;
-                p.y += p.vy;
-                p.life--;
-                if (p.life <= 0) {
-                    particles.splice(i, 1);
-                }
-            }
-            
-            // Check win/lose conditions
-            if (enemies.length === 0) {
-                level++;
-                createEnemyWave();
-            }
-            if (lives <= 0) {
-                gameOver();
-            }
-            
-            // Update UI
-            scoreEl.textContent = score;
-            livesEl.textContent = lives;
-            levelEl.textContent = level;
-        }
-        
-        // Explosion effect
-        function createExplosion(x, y) {
-            for (let i = 0; i < 8; i++) {
-                particles.push({
-                    x: x + 20,
-                    y: y + 15,
-                    vx: (Math.random() - 0.5) * 6,
-                    vy: (Math.random() - 0.5) * 6,
-                    life: 20
-                });
-            }
-        }
-        
-        // Render everything
-        function render() {
-            // Clear canvas
-            ctx.fillStyle = '#111';
-            ctx.fillRect(0, 0, canvas.width, canvas.height);
-            
-            // Draw player
-            ctx.fillStyle = '#0f0';
-            ctx.fillRect(player.x, player.y, player.width, player.height);
-            ctx.fillStyle = '#fff';
-            ctx.fillRect(player.x + 5, player.y + 5, 10, 5);
-            ctx.fillRect(player.x + 35, player.y + 5, 10, 5);
-            
-            // Draw player bullets
-            ctx.fillStyle = '#ff0';
-            player.bullets.forEach(b => ctx.fillRect(b.x, b.y, b.width, b.height));
-            
-            // Draw enemies
-            enemies.forEach(enemy => {
-                ctx.fillStyle = '#f00';
-                ctx.fillRect(enemy.x, enemy.y, enemy.width, enemy.height);
-                ctx.fillStyle = '#fff';
-                ctx.fillRect(enemy.x + 8, enemy.y + 8, 6, 4);
-                ctx.fillRect(enemy.x + 26, enemy.y + 8, 6, 4);
-                ctx.fillStyle = '#f00';
-                ctx.fillRect(enemy.x + 17, enemy.y + 20, 6, 8);
-            });
-            
-            // Draw enemy bullets
-            ctx.fillStyle = '#f80';
-            enemyBullets.forEach(b => ctx.fillRect(b.x, b.y, b.width, b.height));
-            
-            // Draw particles
-            particles.forEach(p => {
-                ctx.fillStyle = `rgba(255, 255, 0, ${p.life / 20})`;
-                ctx.fillRect(p.x, p.y, 3, 3);
-            });
-        }
-        
-        // Game loop
-        function gameLoop() {
-            update();
-            render();
-            if (gameRunning && !gamePaused) {
-                requestAnimationFrame(gameLoop);
-            }
-        }
-        
-        // Game control functions
-        function startGame() {
-            if (!gameRunning) {
-                init();
-            } else if (gamePaused) {
-                gamePaused = false;
-                gameLoop();
-            }
-        }
-        
-        function pauseGame() {
-            gamePaused = !gamePaused;
-        }
-        
-        function resetGame() {
-            gameRunning = false;
-            gameOverEl.style.display = 'none';
-            score = 0;
-            lives = 3;
-            level = 1;
-            init();
-        }
-        
-        function gameOver() {
-            gameRunning = false;
-            finalScoreEl.textContent = score;
-            gameOverEl.style.display = 'block';
-        }
-        
-        // Start with instructions visible
-        render();
-    </script>
+    <!-- Footer -->
+    <footer>
+        <p>&copy; 2026 Praveen Kumar V (23MIS0422). All rights reserved. | Designed for tech portfolios [web:1][web:11][cite:19]</p>
+        <p>Updated: February 2026</p>
+    </footer>
 </body>
 </html>
