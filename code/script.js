@@ -43,7 +43,7 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
     
-    form.addEventListener('submit', (e) => {
+    form.addEventListener('sub  mit', (e) => {
         e.preventDefault();
         alert('Message sent! (Demo - integrate backend for real emails)');
         form.reset();
