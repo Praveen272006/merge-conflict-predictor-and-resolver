@@ -2,7 +2,7 @@
 
 # Get user input
 name = input("What's your name? ")
-age = int(input("How old ar     e you? "))
+age = int(input("How old are you? "))
 
 # Calculate next year's age
 next_year_age = age + 1
