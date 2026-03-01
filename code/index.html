@@ -1,283 +1,286 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Praveen Kumar V</title>
-    <meta name="description" content="Comprehensive portfolio showcasing IoT, AI projects, patents, and research in agriculture tech from Tiruchirappalli.">
-    <meta name="keywords" content="IoT, AI, Arduino, patents, agriculture tech, socio-economic metrics">
-    <!-- Inline CSS for standalone responsiveness -->
-    <style>
-        /* Reset and base styles */
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { 
-            font-family: 'Arial', sans-serif; 
-            line-height: 1.6; 
-            color: #333; 
-            background: linear-gradient(135deg, #f4f4f4, #e0e0e0); 
-        }
-        /* Header styling */
-        header { 
-            background: linear-gradient(135deg, #2c3e50, #3498db); 
-            color: white; 
-            padding: 3rem 2rem; 
-            text-align: center; 
-            box-shadow: 0 4px 15px rgba(0,0,0,0.2); 
-        }
-        h1 { font-size: 3rem; margin-bottom: 0.5rem; text-shadow: 2px 2px 4px rgba(0,0,0,0.3); }
-        /* Navigation */
-        nav { 
-            background: #34495e; 
-            padding: 1rem; 
-            position: sticky; top: 0; z-index: 100; 
-        }
-        nav ul { 
-            list-style: none; 
-            display: flex; 
-            justify-content: center; 
-            flex-wrap: wrap; 
-        }
-        nav li { margin: 0 1.5rem; }
-        nav a { 
-            color: white; 
-            text-decoration: none; 
-            font-weight: bold; 
-            padding: 0.5rem 1rem; 
-            border-radius: 5px; 
-            transition: background 0.3s; 
-        }
-        nav a:hover { background: #3498db; }
-        /* Main container */
-        .container { 
-            max-width: 1200px; 
-            margin: 0 auto; 
-            padding: 2rem; 
-        }
-        /* Sections */
-        section { 
-            margin-bottom: 3rem; 
-            background: white; 
-            padding: 2.5rem; 
-            border-radius: 12px; 
-            box-shadow: 0 4px 20px rgba(0,0,0,0.1); 
-            transition: transform 0.3s; 
-        }
-        section:hover { transform: translateY(-5px); }
-        h2 { 
-            color: #2c3e50; 
-            font-size: 2.2rem; 
-            margin-bottom: 1.5rem; 
-            border-bottom: 3px solid #3498db; 
-            padding-bottom: 0.5rem; 
-        }
-        /* Grids for skills and projects */
-        .skills-grid, .projects-grid, .education-grid { 
-            display: grid; 
-            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); 
-            gap: 2rem; 
-        }
-        .skill-item, .project-item, .education-item { 
-            background: #ecf0f1; 
-            padding: 2rem; 
-            border-radius: 10px; 
-            text-align: center; 
-            border-left: 5px solid #3498db; 
-        }
-        .skill-item h3, .project-item h3 { color: #3498db; margin-bottom: 1rem; }
-        /* Testimonials */
-        .testimonials { display: flex; flex-direction: column; gap: 1.5rem; }
-        .testimonial { 
-            background: #f8f9fa; 
-            padding: 1.5rem; 
-            border-radius: 8px; 
-            font-style: italic; 
-            border-left: 4px solid #e74c3c; 
-        }
-        /* Form styling */
-        form { max-width: 600px; }
-        input, textarea { 
-            width: 100%; 
-            padding: 1rem; 
-            margin-bottom: 1rem; 
-            border: 1px solid #ddd; 
-            border-radius: 5px; 
-            font-size: 1rem; 
-        }
-        button { 
-            background: #3498db; 
-            color: white; 
-            padding: 1rem 2rem; 
-            border: none; 
-            border-radius: 5px; 
-            cursor: pointer; 
-            font-size: 1.1rem; 
-            transition: background 0.3s; 
-        }
-        button:hover { background: #2980b9; }
-        /* Footer */
-        footer { 
-            background: #2c3e50; 
-            color: white; 
-            text-align: center; 
-            padding: 2rem; 
-            margin-top: 3rem; 
-        }
-        /* Mobile responsiveness */
-        @media (max-width: 768px) { 
-            nav ul { flex-direction: column; align-items: center; } 
-            .container { padding: 1rem; } 
-            h1 { font-size: 2rem; }
-        }
-    </style>
+    <title>AI Exam Surveillance Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
-<body>
-    <!-- Hero Header -->
-    <header>
-        <h1>Praveen Kumar V</h1>
-        <p>23MIS0422 | Academic Researcher in IoT, AI & Socio-Economic Innovations</p>
-        <p>Tiruchirappalli, Tamil Nadu, India | Passionate about Patentable Tech Solutions</p>
-    </header>
-    
-    <!-- Navigation Menu -->
-    <nav>
-        <ul>
-            <li><a href="#about">About</a></li>
-            <li><a href="#skills">Skills</a></li>
-            <li><a href="#education">Education</a></li>
-            <li><a href="#projects">Projects</a></li>
-            <li><a href="#publications">Publications</a></li>
-            <li><a href="#testimonials">Testimonials</a></li>
-            <li><a href="#contact">Contact</a></li>
-        </ul>
-    </nav>
-    
-    <div class="container">
-        <!-- About Section -->
-        <section id="about">
-            <h2>About Me</h2>
-            <p>Dynamic graduate student and early-career professional with expertise in IoT prototyping using Arduino microcontrollers, AI integration for practical applications, and socio-economic development metrics.</p>
-            <p>Focused on patentable innovations in agriculture technology, defense systems, and environmental economics. Skilled in software configuration management, technical documentation, and literature reviews.</p>
-            <p>Hobbies include AI-generated video creation, reading patent literature, and experimental validation of AI+IoT projects for real-world impact.</p>
-        </section>
-        
-        <!-- Skills Section -->
-        <section id="skills">
-            <h2>Core Competencies</h2>
-            <div class="skills-grid">
-                <div class="skill-item">
-                    <h3>Hardware Prototyping</h3>
-                    <p>Arduino, 8051 Assembly, sensor interfacing, embedded C/C++ for IoT devices.</p>
-                </div>
-                <div class="skill-item">
-                    <h3>AI & Machine Learning</h3>
-                    <p>AI scripting, predictive models for agriculture, video generation tools.</p>
-                </div>
-                <div class="skill-item">
-                    <h3>Software Engineering</h3>
-                    <p>Configuration management, Git, technical writing, agile methodologies.</p>
-                </div>
-                <div class="skill-item">
-                    <h3>Research & Patents</h3>
-                    <p>Literature reviews, innovation ideation, patent application processes in tech domains.</p>
-                </div>
-                <div class="skill-item">
-                    <h3>Data Analysis</h3>
-                    <p>Socio-economic indices, environmental metrics, dashboard development.</p>
-                </div>
-            </div>
-        </section>
-        
-        <!-- Education Section -->
-        <section id="education">
-            <h2>Education & Experience</h2>
-            <div class="education-grid">
-                <div class="education-item">
-                    <h3>B.Tech/M.Tech in Engineering</h3>
-                    <p>Specialization in Computer Science/Technology Innovation, Tiruchirappalli.</p>
-                </div>
-                <div class="education-item">
-                    <h3>Research Projects</h3>
-                    <p>Developed IoT prototypes for agriculture and defense applications.</p>
-                </div>
-                <div class="education-item">
-                    <h3>Certifications</h3>
-                    <p>Arduino Development, AI Basics, Patent Fundamentals.</p>
-                </div>
-            </div>
-        </section>
-        
-        <!-- Projects Section -->
-        <section id="projects">
-            <h2>Key Projects</h2>
-            <div class="projects-grid">
-                <div class="project-item">
-                    <h3>Smart Agri-IoT Network</h3>
-                    <p>Real-time crop monitoring with soil sensors, AI yield prediction. Patent filed 2025.</p>
-                </div>
-                <div class="project-item">
-                    <h3>AI Educational Video Tool</h3>
-                    <p>Generates tech tutorials using AI scripts and visuals for learning platforms.</p>
-                </div>
-                <div class="project-item">
-                    <h3>Socio-Economic Metrics Dashboard</h3>
-                    <p>Interactive web app for green economics indicators and welfare analysis.</p>
-                </div>
-                <div class="project-item">
-                    <h3>Secure Defense IoT System</h3>
-                    <p>Microcontroller-based encrypted data relay for defense scenarios.</p>
-                </div>
-            </div>
-        </section>
-        
-        <!-- Publications Section -->
-        <section id="publications">
-            <h2>Publications & Research</h2>
-            <ul style="list-style: none; padding-left: 0;">
-                <li style="margin-bottom: 1rem; padding: 1rem; background: #f8f9fa; border-radius: 5px;">
-                    <strong>Graph Labeling in Socio-Tech Networks</strong> - Literature Review, 2025.
-                </li>
-                <li style="margin-bottom: 1rem; padding: 1rem; background: #f8f9fa; border-radius: 5px;">
-                    <strong>IoT for Sustainable Agriculture</strong> - Conference Paper, IEEE, 2026.
-                </li>
-                <li style="margin-bottom: 1rem; padding: 1rem; background: #f8f9fa; border-radius: 5px;">
-                    <strong>Patent: AI-IoT Crop Optimizer</strong> - Filed Jan 2026.
-                </li>
-            </ul>
-        </section>
-        
-        <!-- Testimonials Section -->
-        <section id="testimonials">
-            <h2>Testimonials</h2>
-            <div class="testimonials">
-                <div class="testimonial">
-                    "Praveen's IoT prototypes revolutionized our agri-tech research." - Prof. Advisor
-                </div>
-                <div class="testimonial">
-                    "Excellent grasp of patents and innovation in AI applications." - Industry Mentor
-                </div>
-                <div class="testimonial">
-                    "Outstanding technical documentation and project execution." - Peer Collaborator
-                </div>
-            </div>
-        </section>
-        
-        <!-- Contact Section -->
-        <section id="contact">
-            <h2>Get In Touch</h2>
-            <p>praveen.kumar@example.com | +91-XXXX-XXXXXX | Tiruchirappalli, TN, IN</p>
-            <form>
-                <input type="text" placeholder="Full Name" required>
-                <input type="email" placeholder="Email Address" required>
-                <textarea placeholder="Your Message (e.g., collaboration on IoT projects)" rows="6" required></textarea>
-                <button type="submit">Send Inquiry</button>
-            </form>
-        </section>
+
+<body class="bg-gradient-to-br from-slate-900 to-slate-800 text-white min-h-screen">
+
+<!-- HEADER -->
+<div class="bg-slate-900/70 p-4 flex justify-between items-center border-b border-slate-700">
+    <div>
+        <h1 class="text-2xl font-bold text-blue-400">
+            AI Examination Surveillance System
+        </h1>
+        <p class="text-sm text-slate-400">
+            Real-Time Behavioral Monitoring Dashboard
+        </p>
     </div>
-    
-    <!-- Footer -->
-    <footer>
-        <p>&copy; 2026 Praveen Kumar V (23MIS0422). All rights reserved. | Designed for tech portfolios [web:1][web:11][cite:19]</p>
-        <p>Updated: February 2026</p>
-    </footer>
+    <div class="text-right">
+        <p class="text-sm text-slate-400">Current Time</p>
+        <p id="clock" class="font-semibold text-lg text-green-400"></p>
+    </div>
+</div>
+
+<!-- LIVE VIDEO -->
+<div class="p-8">
+    <div class="bg-slate-800 rounded-2xl p-6 border border-slate-700">
+        <div class="flex justify-between items-center mb-4">
+            <h2 class="text-blue-400 text-xl font-semibold">Live Video Stream</h2>
+            <span id="videoStatus"
+                class="bg-yellow-500/20 text-yellow-400 px-4 py-1 rounded-full text-sm">
+                CONNECTING...
+            </span>
+        </div>
+
+        <div class="bg-black rounded-xl overflow-hidden flex justify-center">
+            <img id="videoStream"
+                src="/video_feed"
+                width="640"
+                height="480"
+                class="rounded-xl"
+                onload="setConnected()"
+                onerror="setDisconnected()" />
+        </div>
+    </div>
+</div>
+
+<div id="studentsContainer" class="px-8 pb-10 space-y-6"></div>
+
+<!-- ALERT MODAL -->
+<div id="alertModal"
+     class="fixed inset-0 bg-black/70 flex items-center justify-center hidden z-50">
+    <div class="bg-red-700 text-white p-8 rounded-2xl shadow-2xl text-center w-96">
+        <h2 class="text-2xl font-bold mb-4">⚠ Suspicious Activity Detected</h2>
+        <p id="alertStudent" class="mb-2 text-lg font-semibold"></p>
+        <p>Risk Level: <span id="alertRisk"></span></p>
+        <p>Final SRI: <span id="alertSRI"></span></p>
+        <p class="mt-2">Recommendation:
+            <span id="alertRecommendation"></span>
+        </p>
+        <button onclick="closeAlert()"
+                class="bg-white text-red-700 px-6 py-2 mt-6 rounded-xl font-semibold">
+            Acknowledge
+        </button>
+    </div>
+</div>
+
+<script>
+
+/* CLOCK */
+function updateClock() {
+    document.getElementById("clock").innerText = new Date().toLocaleString();
+}
+setInterval(updateClock, 1000);
+updateClock();
+
+/* VIDEO STATUS */
+function setConnected() {
+    const s = document.getElementById("videoStatus");
+    s.innerText = "LIVE";
+    s.className = "bg-green-500/20 text-green-400 px-4 py-1 rounded-full text-sm";
+}
+function setDisconnected() {
+    const s = document.getElementById("videoStatus");
+    s.innerText = "DISCONNECTED";
+    s.className = "bg-red-500/20 text-red-400 px-4 py-1 rounded-full text-sm";
+}
+
+const students = {};
+let alertActive = false;
+
+/* CREATE STUDENT CARD */
+function createStudentCard(id, name, reg_no) {
+
+    const container = document.getElementById("studentsContainer");
+
+    const card = document.createElement("div");
+    card.className = "bg-slate-800 rounded-2xl p-6 border border-slate-700";
+
+    card.innerHTML = `
+        <h2 class="text-green-400 font-semibold text-lg mb-6">
+            ID ${id} | ${name} | ${reg_no}
+        </h2>
+
+        <div class="grid grid-cols-8 gap-6">
+
+            <div class="bg-slate-700 p-4 rounded-xl">
+                <h3 class="text-blue-300 mb-2">Head</h3>
+                <canvas id="headChart-${id}"></canvas>
+            </div>
+
+            <div class="bg-slate-700 p-4 rounded-xl">
+                <h3 class="text-cyan-300 mb-2">Angles</h3>
+                <p>Yaw: <span id="yaw-${id}" class="text-red-400">0</span>°</p>
+                <p>Pitch: <span id="pitch-${id}" class="text-blue-400">0</span>°</p>
+                <p>Roll: <span id="roll-${id}" class="text-green-400">0</span>°</p>
+            </div>
+
+            <div class="bg-slate-700 p-4 rounded-xl">
+                <h3 class="text-yellow-300 mb-2">Blink</h3>
+                <p id="blink-${id}" class="text-xl text-yellow-400">0</p>
+            </div>
+
+            <div class="bg-slate-700 p-4 rounded-xl">
+                <h3 class="text-purple-300 mb-2">Mouth</h3>
+                <p id="mouth-${id}" class="text-xl text-purple-400">Closed</p>
+            </div>
+
+            <div class="bg-slate-700 p-4 rounded-xl">
+                <h3 class="text-red-300 mb-2">Mobile</h3>
+                <p id="mobile-${id}" class="text-xl text-green-400">Not Present</p>
+            </div>
+
+            <div class="bg-slate-700 p-4 rounded-xl">
+                <h3 class="text-orange-300 mb-2">Suspicion</h3>
+                <p id="prob-${id}" class="text-2xl font-bold text-green-400">0%</p>
+                <p id="risk-${id}" class="text-lg text-green-400">Normal</p>
+            </div>
+
+            <div class="bg-slate-700 p-4 rounded-xl">
+                <h3 class="text-pink-300 mb-2">Reason</h3>
+                <p id="reason-${id}" class="text-lg text-pink-400">Stable</p>
+            </div>
+
+            <div class="bg-slate-700 p-4 rounded-xl">
+                <h3 class="text-indigo-300 mb-2">SRI</h3>
+                <p id="sri-${id}" class="text-lg text-indigo-400">0</p>
+            </div>
+
+        </div>
+
+        <div class="bg-slate-700 p-6 rounded-xl mt-8">
+            <h3 class="text-teal-300 text-lg font-semibold mb-4">
+                Exam Behavioral Summary
+            </h3>
+
+            <p><strong>Name:</strong> ${name}</p>
+            <p><strong>Registration No:</strong> ${reg_no}</p>
+            <p><strong>Tracking ID:</strong> ${id}</p>
+
+            <hr class="border-slate-500 my-3">
+
+            <p>Risk Level:
+                <span id="reportRisk-${id}" class="font-semibold text-yellow-400">Low</span>
+            </p>
+
+            <p>Stability Index:
+                <span id="reportStability-${id}" class="font-semibold text-blue-400">100%</span>
+            </p>
+
+            <p>Recommendation:
+                <span id="reportRecommendation-${id}" class="font-semibold text-green-400">
+                    No action required
+                </span>
+            </p>
+        </div>
+    `;
+
+    container.appendChild(card);
+
+    students[id] = {
+        reg_no: reg_no,
+        headChart: new Chart(document.getElementById(`headChart-${id}`), {
+            type: "line",
+            data: {
+                labels: [],
+                datasets: [
+                    { label: "Yaw", data: [], borderColor: "red" },
+                    { label: "Pitch", data: [], borderColor: "blue" },
+                    { label: "Roll", data: [], borderColor: "green" }
+                ]
+            },
+            options: { responsive: true, animation: false }
+        })
+    };
+}
+
+/* POPUP */
+function showAlert(data, report) {
+    if (alertActive) return;
+    alertActive = true;
+
+    document.getElementById("alertStudent").innerText =
+        `${data.name} | ${data.reg_no}`;
+    document.getElementById("alertRisk").innerText =
+        report.exam_behavior_summary.risk_level;
+    document.getElementById("alertSRI").innerText =
+        report.exam_behavior_summary.final_sri;
+    document.getElementById("alertRecommendation").innerText =
+        report.exam_behavior_summary.system_recommendation;
+
+    document.getElementById("alertModal").classList.remove("hidden");
+}
+
+function closeAlert() {
+    document.getElementById("alertModal").classList.add("hidden");
+    alertActive = false;
+}
+
+/* FETCH */
+async function fetchPose() {
+    try {
+        const response = await fetch("/pose");
+        const data = await response.json();
+
+        for (const id in data) {
+
+            if (!students[id]) {
+                createStudentCard(id, data[id].name, data[id].reg_no);
+            }
+
+            const regNo = students[id].reg_no;
+
+            document.getElementById(`yaw-${id}`).innerText = data[id].yaw;
+            document.getElementById(`pitch-${id}`).innerText = data[id].pitch;
+            document.getElementById(`roll-${id}`).innerText = data[id].roll;
+            document.getElementById(`blink-${id}`).innerText = data[id].blink;
+            document.getElementById(`mouth-${id}`).innerText =
+                data[id].mouth === 1 ? "Open" : "Closed";
+            document.getElementById(`reason-${id}`).innerText = data[id].reason;
+            document.getElementById(`sri-${id}`).innerText = data[id].sri;
+            document.getElementById(`risk-${id}`).innerText = data[id].risk;
+            document.getElementById(`prob-${id}`).innerText =
+                Math.round(data[id].probability * 100) + "%";
+
+            /* GRAPH UPDATE */
+            const chart = students[id].headChart;
+            chart.data.labels.push("");
+            chart.data.datasets[0].data.push(Number(data[id].yaw));
+            chart.data.datasets[1].data.push(Number(data[id].pitch));
+            chart.data.datasets[2].data.push(Number(data[id].roll));
+            if (chart.data.labels.length > 15) {
+                chart.data.labels.shift();
+                chart.data.datasets.forEach(ds => ds.data.shift());
+            }
+            chart.update("none");
+
+            /* FETCH REPORT */
+            const reportRes = await fetch(`/report/${regNo}`);
+            const reportData = await reportRes.json();
+            const summary = reportData.exam_behavior_summary;
+
+            document.getElementById(`reportRisk-${id}`).innerText = summary.risk_level;
+            document.getElementById(`reportStability-${id}`).innerText =
+                summary.stability_index + "%";
+            document.getElementById(`reportRecommendation-${id}`).innerText =
+                summary.system_recommendation;
+
+            if (summary.risk_level === "Critical") {
+                showAlert(data[id], reportData);
+            }
+        }
+
+    } catch (error) {
+        console.log("Pose API Error:", error);
+    }
+}
+
+setInterval(fetchPose, 1500);
+
+</script>
+
 </body>
 </html>
