@@ -1,4 +1,4 @@
-const API_KEY = 'YOUdhsf  R_OPENWEATHERMAP_API_KEY'; // Get free at openweathermap.org
+const API_KEY = 'YOU    dhsf  R_OPENWEATHERMAP_API_KEY'; // Get free at openweathermap.org
 const API_URL = 'https://api.openweathermap.org/data/2.5/weather';
 const FORECAST_URL = 'https://api.openweathermap.org/data/2.5/forecast';
 
