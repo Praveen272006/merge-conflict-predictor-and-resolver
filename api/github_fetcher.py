@@ -3,23 +3,22 @@ import os
 
 GITHUB_TOKEN = os.getenv("GITHUB_TOKEN")
 
-
 def get_commit_changes(repo_name, sha):
+    """
+    Fetch full commit details from GitHub API
+    """
+
     url = f"https://api.github.com/repos/{repo_name}/commits/{sha}"
 
     headers = {
-        "Authorization": f"Bearer {GITHUB_TOKEN}",
-        "Accept": "application/vnd.github+json"
+        "Authorization": f"token {GITHUB_TOKEN}",
+        "Accept": "application/vnd.github.v3+json"
     }
 
-    r = requests.get(url, headers=headers)
-    data = r.json()
+    response = requests.get(url, headers=headers)
 
-    total_changes = 0
-    files_changed = 0
+    if response.status_code != 200:
+        print("GitHub API error:", response.status_code)
+        return {}
 
-    for file in data.get("files", []):
-        total_changes += file.get("changes", 0)
-        files_changed += 1
-
-    return files_changed, total_changes
+    return response.json()
