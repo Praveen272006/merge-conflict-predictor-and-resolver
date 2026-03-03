@@ -4,7 +4,6 @@ from api.github_bot import post_commit_comment
 from model.explainer import explain_risk
 from model.line_analyzer import detect_risky_lines
 from api.github_fetcher import get_commit_changes
-from auto_resolver.resolver import resolve_conflicts
 
 # =====================================================
 # CREATE FASTAPI APP
@@ -107,7 +106,7 @@ async def github_webhook(request: Request):
     )
 
     # -------------------------------------------------
-    # RISKY AREA DETECTION
+    # RISKY LINE DETECTION
     # -------------------------------------------------
     try:
         risky_areas = detect_risky_lines(commits)
@@ -116,17 +115,42 @@ async def github_webhook(request: Request):
         risky_areas = []
 
     risk_area_text = ""
+    resolution_text = ""
+
     for r in risky_areas:
-        risk_area_text += f"\n- {r.get('file')} → {r.get('reason')}"
+        file = r.get("file")
+        line = r.get("line")
+        issue = r.get("issue")
+        code = r.get("code")
+
+        risk_area_text += f"\n- {file} (Line {line}) → {issue}"
+
+        # Basic resolution logic (you can improve later)
+        suggested_fix = code.strip()
+
+        resolution_text += f"""
+📂 File: {file}
+📍 Line: {line}
+
+⚠ Issue:
+{issue}
+
+Current Code:
+{code}
+
+✅ Suggested Fix:
+{suggested_fix}
+
+Explanation:
+Review this modification carefully. Ensure logic consistency with other branches.
+"""
 
     if not risk_area_text:
         risk_area_text = "\n- No risky files detected"
 
     # -------------------------------------------------
-    # AUTO RESOLVER (REAL CONFLICT SUGGESTION)
+    # AUTO RESOLVER TRIGGER
     # -------------------------------------------------
-    auto_fix_message = ""
-
     HIGH_RATIO_THRESHOLD = 120
     HIGH_CHANGE_THRESHOLD = 400
 
@@ -136,38 +160,13 @@ async def github_webhook(request: Request):
         or total_changes > HIGH_CHANGE_THRESHOLD
     )
 
-    if trigger_auto:
+    auto_fix_message = ""
 
-        # 🔥 Simulated conflict block (later replace with real file fetch)
-        simulated_conflict = """
-<<<<<<< HEAD
-return x + y
-=======
-return x - y
->>>>>>> branch
-"""
-
-        result = resolve_conflicts(simulated_conflict)
-
-        if result["has_conflict"]:
-
-            auto_fix_message = "\n---\n### ⚡ Conflict Resolution Suggestions\n"
-
-            for sol in result["solutions"]:
-                auto_fix_message += f"""
-📍 Line {sol['line']}
-
-HEAD Version:
-{sol['head']}
-
-Incoming Version:
-{sol['incoming']}
-
-✅ Suggested Fix:
-{sol['suggested_fix']}
-
-Reason:
-{sol['reason']}
+    if trigger_auto and resolution_text:
+        auto_fix_message = f"""
+---
+### ⚡ Conflict Resolution Suggestions
+{resolution_text}
 """
 
     # -------------------------------------------------
