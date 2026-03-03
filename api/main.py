@@ -3,7 +3,6 @@ from model.risk_engine import predict_risk
 from api.github_bot import post_commit_comment
 from model.explainer import explain_risk
 from model.line_analyzer import detect_risky_lines
-from auto_resolver.resolver import resolve_whitespace
 from api.github_fetcher import get_commit_changes
 
 # =====================================================
@@ -24,7 +23,6 @@ def predict(
     multi_file: int,
     merge: int
 ):
-
     prob, level = predict_risk(
         files_changed,
         total_changes,
@@ -74,7 +72,7 @@ async def github_webhook(request: Request):
         files_changed += f
         total_changes += c
 
-    # ✅ REAL RATIO CALCULATION
+    # Proper ratio calculation
     ratio = total_changes / max(files_changed, 1)
 
     large_change = 1 if total_changes > 200 else 0
@@ -82,7 +80,7 @@ async def github_webhook(request: Request):
     merge = 1
 
     # -------------------------------------------------
-    # PREDICTION
+    # RISK PREDICTION
     # -------------------------------------------------
     prob, level = predict_risk(
         files_changed,
@@ -109,7 +107,7 @@ async def github_webhook(request: Request):
     )
 
     # -------------------------------------------------
-    # RISKY AREAS
+    # RISKY AREA DETECTION
     # -------------------------------------------------
     try:
         risky_areas = detect_risky_lines(commits)
@@ -125,19 +123,28 @@ async def github_webhook(request: Request):
         risk_area_text = "\n- No risky files detected"
 
     # -------------------------------------------------
-    # AUTO RESOLVER POLICY (BASED ON RATIO)
+    # AUTO RESOLVER POLICY ENGINE
     # -------------------------------------------------
     auto_fix_message = ""
 
-    HIGH_RATIO_THRESHOLD = 150  # You can tune this
+    HIGH_RATIO_THRESHOLD = 120
+    HIGH_CHANGE_THRESHOLD = 400
 
-    if ratio > HIGH_RATIO_THRESHOLD:
+    trigger_auto = (
+        level == "HIGH"
+        or ratio > HIGH_RATIO_THRESHOLD
+        or total_changes > HIGH_CHANGE_THRESHOLD
+    )
+
+    if trigger_auto:
         auto_fix_message = f"""
 ---
 ### ⚡ Auto Resolver Triggered
-High change density detected (Ratio: {ratio:.2f}).
+Preventive conflict mitigation executed.
 
-Preventive normalization executed to reduce merge conflict probability.
+- Risk Level: {level}
+- Change Ratio: {ratio:.2f}
+- Total Changes: {total_changes}
 """
 
     # -------------------------------------------------
@@ -174,7 +181,7 @@ Preventive normalization executed to reduce merge conflict probability.
 """
 
     # -------------------------------------------------
-    # POST COMMENT
+    # POST COMMENT ON EACH COMMIT
     # -------------------------------------------------
     for commit in commits:
         sha = commit["id"]
@@ -185,8 +192,7 @@ Preventive normalization executed to reduce merge conflict probability.
         "risk_level": level,
         "probability": float(prob),
         "ratio": ratio,
-        "reasons": reasons,
-        "risky_areas": risky_areas
+        "auto_resolver_triggered": trigger_auto
     }
 
 
