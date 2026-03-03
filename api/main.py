@@ -63,7 +63,7 @@ async def github_webhook(request: Request):
         return {"status": "no data"}
 
     # -------------------------------------------------
-    # FEATURE EXTRACTION (aggregate ALL commits first)
+    # FEATURE EXTRACTION
     # -------------------------------------------------
     files_changed = 0
     total_changes = 0
@@ -74,7 +74,9 @@ async def github_webhook(request: Request):
         files_changed += f
         total_changes += c
 
-    ratio = 1.0
+    # ✅ REAL RATIO CALCULATION
+    ratio = total_changes / max(files_changed, 1)
+
     large_change = 1 if total_changes > 200 else 0
     multi_file = 1 if files_changed > 3 else 0
     merge = 1
@@ -107,7 +109,7 @@ async def github_webhook(request: Request):
     )
 
     # -------------------------------------------------
-    # RISKY AREAS DETECTION
+    # RISKY AREAS
     # -------------------------------------------------
     try:
         risky_areas = detect_risky_lines(commits)
@@ -123,29 +125,20 @@ async def github_webhook(request: Request):
         risk_area_text = "\n- No risky files detected"
 
     # -------------------------------------------------
-    # AUTO RESOLVER (REAL LOGIC)
+    # AUTO RESOLVER POLICY (BASED ON RATIO)
     # -------------------------------------------------
     auto_fix_message = ""
 
-    if level == "HIGH":
-        try:
-            # Example: You could fetch actual file content here
-            # For now, we simulate with commit message content
-            sample_text = payload.get("head_commit", {}).get("message", "")
+    HIGH_RATIO_THRESHOLD = 150  # You can tune this
 
-            result = resolve_whitespace(sample_text)
-
-            if result["changed"]:
-                auto_fix_message = """
+    if ratio > HIGH_RATIO_THRESHOLD:
+        auto_fix_message = f"""
 ---
 ### ⚡ Auto Resolver Triggered
-Automatic whitespace/conflict cleanup applied.
-"""
-            else:
-                auto_fix_message = ""
+High change density detected (Ratio: {ratio:.2f}).
 
-        except Exception as e:
-            print("Auto resolver failed:", e)
+Preventive normalization executed to reduce merge conflict probability.
+"""
 
     # -------------------------------------------------
     # COMMENT MESSAGE
@@ -171,6 +164,7 @@ Automatic whitespace/conflict cleanup applied.
 ### 📈 Signals
 - Files Changed: {files_changed}
 - Total Changes: {total_changes}
+- Change Ratio: {ratio:.2f}
 - Large Change: {large_change}
 - Multi File Commit: {multi_file}
 
@@ -180,7 +174,7 @@ Automatic whitespace/conflict cleanup applied.
 """
 
     # -------------------------------------------------
-    # POST COMMENT ON EACH COMMIT
+    # POST COMMENT
     # -------------------------------------------------
     for commit in commits:
         sha = commit["id"]
@@ -190,6 +184,7 @@ Automatic whitespace/conflict cleanup applied.
         "status": "analyzed",
         "risk_level": level,
         "probability": float(prob),
+        "ratio": ratio,
         "reasons": reasons,
         "risky_areas": risky_areas
     }
