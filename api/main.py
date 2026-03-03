@@ -60,17 +60,31 @@ async def github_webhook(request: Request):
     if not repo_name or not commits:
         return {"status": "no data"}
 
-    # -------------------------------------------------
-    # FEATURE EXTRACTION
-    # -------------------------------------------------
     files_changed = 0
     total_changes = 0
+    all_risky_areas = []
 
+    # -------------------------------------------------
+    # PROCESS EACH COMMIT
+    # -------------------------------------------------
     for commit in commits:
+
         sha = commit["id"]
-        f, c = get_commit_changes(repo_name, sha)
-        files_changed += f
-        total_changes += c
+
+        # 🔥 IMPORTANT: Fetch full commit details from GitHub API
+        commit_details = get_commit_changes(repo_name, sha)
+
+        # Count file + change stats
+        commit_files = commit_details.get("files", [])
+        files_changed += len(commit_files)
+
+        for f in commit_files:
+            total_changes += f.get("additions", 0)
+            total_changes += f.get("deletions", 0)
+
+        # Detect risky lines from full patch data
+        risky_areas = detect_risky_lines(commit_details)
+        all_risky_areas.extend(risky_areas)
 
     ratio = total_changes / max(files_changed, 1)
 
@@ -106,18 +120,12 @@ async def github_webhook(request: Request):
     )
 
     # -------------------------------------------------
-    # RISKY LINE DETECTION
+    # BUILD RISK + RESOLUTION TEXT
     # -------------------------------------------------
-    try:
-        risky_areas = detect_risky_lines(commits)
-    except Exception as e:
-        print("Risk detection error:", e)
-        risky_areas = []
-
     risk_area_text = ""
     resolution_text = ""
 
-    for r in risky_areas:
+    for r in all_risky_areas:
         file = r.get("file")
         line = r.get("line")
         issue = r.get("issue")
@@ -125,7 +133,7 @@ async def github_webhook(request: Request):
 
         risk_area_text += f"\n- {file} (Line {line}) → {issue}"
 
-        # Basic resolution logic (you can improve later)
+        # Basic intelligent resolution
         suggested_fix = code.strip()
 
         resolution_text += f"""
@@ -142,14 +150,15 @@ Current Code:
 {suggested_fix}
 
 Explanation:
-Review this modification carefully. Ensure logic consistency with other branches.
+This line was modified in the latest commit.
+Verify consistency with related logic before merging.
 """
 
     if not risk_area_text:
         risk_area_text = "\n- No risky files detected"
 
     # -------------------------------------------------
-    # AUTO RESOLVER TRIGGER
+    # AUTO RESOLVER POLICY
     # -------------------------------------------------
     HIGH_RATIO_THRESHOLD = 120
     HIGH_CHANGE_THRESHOLD = 400
