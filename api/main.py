@@ -4,6 +4,7 @@ from api.github_bot import post_commit_comment
 from model.explainer import explain_risk
 from model.line_analyzer import detect_risky_lines
 from api.github_fetcher import get_commit_changes
+from auto_resolver.resolver import resolve_conflicts
 
 # =====================================================
 # CREATE FASTAPI APP
@@ -72,7 +73,6 @@ async def github_webhook(request: Request):
         files_changed += f
         total_changes += c
 
-    # Proper ratio calculation
     ratio = total_changes / max(files_changed, 1)
 
     large_change = 1 if total_changes > 200 else 0
@@ -123,7 +123,7 @@ async def github_webhook(request: Request):
         risk_area_text = "\n- No risky files detected"
 
     # -------------------------------------------------
-    # AUTO RESOLVER POLICY ENGINE
+    # AUTO RESOLVER (REAL CONFLICT SUGGESTION)
     # -------------------------------------------------
     auto_fix_message = ""
 
@@ -137,14 +137,37 @@ async def github_webhook(request: Request):
     )
 
     if trigger_auto:
-        auto_fix_message = f"""
----
-### ⚡ Auto Resolver Triggered
-Preventive conflict mitigation executed.
 
-- Risk Level: {level}
-- Change Ratio: {ratio:.2f}
-- Total Changes: {total_changes}
+        # 🔥 Simulated conflict block (later replace with real file fetch)
+        simulated_conflict = """
+<<<<<<< HEAD
+return x + y
+=======
+return x - y
+>>>>>>> branch
+"""
+
+        result = resolve_conflicts(simulated_conflict)
+
+        if result["has_conflict"]:
+
+            auto_fix_message = "\n---\n### ⚡ Conflict Resolution Suggestions\n"
+
+            for sol in result["solutions"]:
+                auto_fix_message += f"""
+📍 Line {sol['line']}
+
+HEAD Version:
+{sol['head']}
+
+Incoming Version:
+{sol['incoming']}
+
+✅ Suggested Fix:
+{sol['suggested_fix']}
+
+Reason:
+{sol['reason']}
 """
 
     # -------------------------------------------------
@@ -181,7 +204,7 @@ Preventive conflict mitigation executed.
 """
 
     # -------------------------------------------------
-    # POST COMMENT ON EACH COMMIT
+    # POST COMMENT
     # -------------------------------------------------
     for commit in commits:
         sha = commit["id"]
