@@ -1,4 +1,4 @@
-:rooooot { --bg: #f0f4f8; --card: white; --text: #333; --accent: #4a90e2; --dark-bg: #1a1a2e; --dark-card: #16213e; --dark-text: #ecf0f1; }
+:root { --bg: #f0f4f8; --card: white; --text: #333; --accent: #4a90e2; --dark-bg: #1a1a2e; --dark-card: #16213e; --dark-text: #ecf0f1; }
 * { margin: 0; padding: 0; box-sizing: border-box; }
 body { font-family: 'Segoe UI', sans-serif; background: var(--bg); color: var(--text); transition: all 0.3s; }
 body.dark { --bg: var(--dark-bg); --card: var(--dark-card); --text: var(--dark-text); --accent: #7dd3fc; }
