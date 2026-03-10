@@ -9,7 +9,7 @@ class Student:
         print("Name:",self.name)
         print("Age:",self.age)
         print("Department:",self.department)
-        print("---------------------")
+        print("-------------  fdf--------")
 
 
 class StudentManager:
@@ -28,7 +28,7 @@ class StudentManager:
     def show_students(self):
 
         if not self.students:
-            print("No students available")
+            print("No students a   vailable")
 
         for s in self.students:
             s.display()
@@ -38,38 +38,38 @@ class StudentManager:
         for s in self.students:
             if s.name==name:
                 self.students.remove(s)
-                print("Student deleted")
+                print("Stude   nt deleted")
                 return
 
-        print("Student not found")
+        print("Student not f   ound")
 
     def search_student(self,name):
 
-        for s in self.students:
-            if s.name==name:
+        for s in self.st   udents:
+            if s.name==n   ame:
                 s.display()
                 return
 
-        print("Student not found")
+        print("Student    not found")
+  
 
-
-manager=StudentManager()
+manager=StudentMana  ger()
 
 while True:
 
-    print("\n1.Add Student")
-    print("2.Show Students")
-    print("3.Delete Student")
-    print("4.Search Student")
+    print("\n1.Add Stud  ent")
+    print("2.Show Stude  nts")
+    print("3.Delete Stu   dent")
+    print("4.Search Stud   ent")
     print("5.Exit")
 
-    choice=input("Enter choice: ")
-
+    choice=input("Enter c   hoice: ")
+   
     if choice=="1":
 
-        name=input("Enter name: ")
+        name=input("Enter     name: ")
         age=int(input("Enter age: "))
-        dept=input("Enter department: ")
+        dept=input("Enter depart   ment: ")
 
         manager.add_student(name,age,dept)
 
@@ -79,13 +79,13 @@ while True:
 
     elif choice=="3":
 
-        name=input("Enter name to delete: ")
+        name=input("Enter name t   o delete: ")
 
         manager.delete_student(name)
 
     elif choice=="4":
 
-        name=input("Enter name to search: ")
+        name=input("Enter    name to search: ")
 
         manager.search_student(name)
 

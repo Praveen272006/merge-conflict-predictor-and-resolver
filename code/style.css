@@ -1,20 +1,20 @@
 body {
-  margin: 0;
-  font-family: system-ui, sans-serif;
+  margin: 0;  
+  font-family: system-ui, sans   -serif;
   background: #0f172a;
   color: #e5e7eb;
   display: flex;
-  justify-content: center;
+  justify-content:   center;
   align-items: center;
-  min-height: 100vh;
+  min-height: 100v  h;
 }
 
 .app {
-  background: #111827;
+  background: #111   827;
   padding: 24px;
   border-radius: 12px;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
-  text-align: center;
+  box-shadow: 0 10p   x 30px rgba(0, 0, 0, 0.4);
+  text-align: cente   r;
   width: 320px;
 }
 
