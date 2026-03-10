@@ -30,6 +30,6 @@ const greetingEl = document.getElementById("greeting");
 
 form.addEventListener("submit", (event) => {
   event.preventDefault();
-  const name = nameInput.value.trim() || "friend";
+  const name = nameInput.value.trim() || "frie nd";
   greetingEl.textContent = `Hello, ${name}!`;
 });

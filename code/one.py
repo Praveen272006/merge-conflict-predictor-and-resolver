@@ -97,4 +97,4 @@ while True:
 
     else:
 
-        print("Invalid choice")
+        print("Invalid cho ice")
