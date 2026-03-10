@@ -1,76 +1,35 @@
-const form = document.getElementById("studentForm");
-const table = document.getElementById("studentTable").getElementsByTagName('tbody')[0];
+const countEl = document.getElementById("count");
+const incBtn = document.getElementById("increment");
+const decBtn = document.getElementById("decrement");
+const resetBtn = document.getElementById("reset");
 
-let students = [];
+let count = 0;
 
-form.addEventListener("submit",function(e){
-
-e.preventDefault();
-
-let name=document.getElementById("name").value;
-let age=document.getElementById("age").value;
-let dept=document.getElementById("dept").value;
-
-let student={
-name:name,
-age:age,
-dept:dept
-};
-
-students.push(student);
-
-displayStudents();
-
-form.reset();
-
-});
-
-function displayStudents(){
-
-table.innerHTML="";
-
-students.forEach(function(student,index){
-
-let row=table.insertRow();
-
-let cell1=row.insertCell(0);
-let cell2=row.insertCell(1);
-let cell3=row.insertCell(2);
-let cell4=row.insertCell(3);
-
-cell1.innerHTML=student.name;
-cell2.innerHTML=student.age;
-cell3.innerHTML=student.dept;
-
-let btn=document.createElement("button");
-
-btn.innerText="Delete";
-btn.className="delete-btn";
-
-btn.onclick=function(){
-deleteStudent(index);
-};
-
-cell4.appendChild(btn);
-
-});
-
+function render() {
+  countEl.textContent = count;
 }
 
-function deleteStudent(index){
-
-students.splice(index,1);
-
-displayStudents();
-
-}
-
-function searchStudent(name){
-
-return students.filter(function(student){
-
-return student.name.toLowerCase().includes(name.toLowerCase());
-
+incBtn.addEventListener("click", () => {
+  count += 1;
+  render();
 });
 
-}
+decBtn.addEventListener("click", () => {
+  count -= 1;
+  render();
+});
+
+resetBtn.addEventListener("click", () => {
+  count = 0;
+  render();
+});
+
+const form = document.getElementById("name-form");
+const nameInput = document.getElementById("name-input");
+const greetingEl = document.getElementById("greeting");
+
+form.addEventListener("submit", (event) => {
+  event.preventDefault();
+  const name = nameInput.value.trim() || "friend";
+  greetingEl.textContent = `Hello, ${name}!`;
+});
