@@ -3,10 +3,14 @@ import os
 from dotenv import load_dotenv
 
 load_dotenv()
+
 GITHUB_TOKEN = os.getenv("GITHUB_TOKEN")
 
 
 def get_commit_changes(repo_name, sha):
+    """
+    Fetch full commit details from GitHub API
+    """
 
     url = f"https://api.github.com/repos/{repo_name}/commits/{sha}"
 
@@ -19,13 +23,7 @@ def get_commit_changes(repo_name, sha):
 
     if response.status_code != 200:
         print("GitHub API error:", response.status_code)
-        return 0, 0, {}
+        return {}
 
-    data = response.json()
-
-    files = data.get("files", [])
-
-    files_changed = len(files)
-    total_changes = sum(f.get("changes", 0) for f in files)
-
-    return files_changed, total_changes, data
+    # ✅ IMPORTANT: return FULL JSON only (not tuple)
+    return response.json()
