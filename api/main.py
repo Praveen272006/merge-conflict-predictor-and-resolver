@@ -44,6 +44,7 @@ async def github_webhook(request: Request):
         for f in files:
             total_changes += f.get("changes", 0)
 
+    # Features
     features = {
         "commit_frequency": len(commits),
         "change_density": total_changes,
@@ -57,8 +58,23 @@ async def github_webhook(request: Request):
     reasons = explain_prediction(features)
 
     graph = build_dev_graph(commits)
-    resolutions = generate_resolution(all_risky)
     signals = calculate_signals(commits, total_files, total_changes)
+
+    # 🔥 RESOLUTION
+    commit_data_latest = get_commit_changes(repo_name, latest_commit_sha)
+    resolutions = generate_resolution(commit_data_latest)
+
+    resolution_text = ""
+    for r in resolutions:
+        resolution_text += f"""
+📄 File: {r['file']}
+📍 Line: {r['line']}
+⚠️ Issue: {r['issue']}
+🔴 Current Code: {r['code']}
+🟢 Suggested Fix: {r['fix']}
+💡 Explanation: {r['explanation']}
+----------------------------------
+"""
 
     risky_text = "\n".join(
         [f"• {r['file']} (Line {r['line']})" for r in all_risky[:5]]
@@ -91,7 +107,7 @@ async def github_webhook(request: Request):
 ----------------------------------
 
 🛠 Conflict Resolution Suggestions:
-{resolutions}
+{resolution_text}
 
 ----------------------------------
 
