@@ -30,11 +30,13 @@ async def github_webhook(request: Request):
     total_changes = 0
     total_files = 0
 
+    # 🔥 PROCESS ALL COMMITS
     for commit in commits:
 
         sha = commit["id"]
         commit_data = get_commit_changes(repo_name, sha)
 
+        # Risky lines
         risky = detect_risky_lines(commit_data)
         all_risky.extend(risky)
 
@@ -44,7 +46,7 @@ async def github_webhook(request: Request):
         for f in files:
             total_changes += f.get("changes", 0)
 
-    # Features
+    # 🔥 FEATURES
     features = {
         "commit_frequency": len(commits),
         "change_density": total_changes,
@@ -53,6 +55,7 @@ async def github_webhook(request: Request):
         "developer_interaction": len(commits)
     }
 
+    # 🔥 AI OUTPUT
     prob, risk = predict_risk(features)
     score = calculate_conflict_score(features)
     reasons = explain_prediction(features)
@@ -60,28 +63,48 @@ async def github_webhook(request: Request):
     graph = build_dev_graph(commits)
     signals = calculate_signals(commits, total_files, total_changes)
 
-    # 🔥 RESOLUTION
+    # 🔥 GET FULL RESOLUTION DATA
     commit_data_latest = get_commit_changes(repo_name, latest_commit_sha)
     resolutions = generate_resolution(commit_data_latest)
 
+    # 🔥 FORMAT RESOLUTION OUTPUT
     resolution_text = ""
+
     for r in resolutions:
+
+        symbol = "🟢" if r["type"] == "ADDED" else "🔴"
+
         resolution_text += f"""
 📄 File: {r['file']}
 📍 Line: {r['line']}
 ⚠️ Issue: {r['issue']}
-🔴 Current Code: {r['code']}
-🟢 Suggested Fix: {r['fix']}
-💡 Explanation: {r['explanation']}
+
+{symbol} Code:
+{r['code']}
+
+🛠 Suggested Fix:
+{r['fix']}
+
+💡 Explanation:
+{r['explanation']}
+
 ----------------------------------
 """
 
-    risky_text = "\n".join(
-        [f"• {r['file']} (Line {r['line']})" for r in all_risky[:5]]
-    ) or "• No risky lines"
+    # 🔥 RISKY AREAS (WITH TYPE)
+    risky_text = ""
 
+    for r in resolutions[:20]:  # limit only display here
+        action = "New logic added" if r["type"] == "ADDED" else "Old logic removed"
+        risky_text += f"• {r['file']} (Line {r['line']}) → {action}\n"
+
+    if not risky_text:
+        risky_text = "• No risky lines"
+
+    # 🔥 GRAPH
     graph_text = "\n".join(graph[:5]) if graph else "• Single developer"
 
+    # 🔥 FINAL COMMENT
     comment = f"""
 🚀 AI Merge Conflict Analysis
 
@@ -120,6 +143,7 @@ async def github_webhook(request: Request):
 • Merge Commit: {signals['merge']}
 """
 
+    # 🔥 POST COMMENT TO GITHUB
     post_commit_comment(repo_name, latest_commit_sha, comment)
 
     return {"status": "success"}
