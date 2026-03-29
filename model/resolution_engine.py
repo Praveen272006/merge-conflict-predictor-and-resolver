@@ -98,6 +98,9 @@ def generate_resolution(commit_data):
         new_block = []
         block_start = 0
 
+        # 🔥 FINAL MERGED RESULT FOR FILE
+        final_merged_lines = []
+
         for line in lines:
 
             # HUNK HEADER
@@ -127,16 +130,7 @@ def generate_resolution(commit_data):
                 if old_block or new_block:
 
                     merged = merge_blocks(old_block, new_block)
-
-                    resolutions.append({
-                        "file": filename,
-                        "line": block_start,
-                        "type": "MERGED",
-                        "issue": "Conflicting logic",
-                        "code": merged,
-                        "fix": merged,
-                        "explanation": "AI merged conflicting changes intelligently"
-                    })
+                    final_merged_lines.append(merged)
 
                     old_block = []
                     new_block = []
@@ -146,15 +140,21 @@ def generate_resolution(commit_data):
         # LAST BLOCK
         if old_block or new_block:
             merged = merge_blocks(old_block, new_block)
+            final_merged_lines.append(merged)
+
+        # 🔥 ONLY ONE OUTPUT PER FILE
+        if final_merged_lines:
+
+            final_code = "\n".join(final_merged_lines)
 
             resolutions.append({
                 "file": filename,
-                "line": block_start,
+                "line": 1,
                 "type": "MERGED",
                 "issue": "Conflicting logic",
-                "code": merged,
-                "fix": merged,
-                "explanation": "AI merged conflicting changes intelligently"
+                "code": final_code,
+                "fix": final_code,
+                "explanation": "AI merged all conflicting changes into a single optimized solution"
             })
 
     return resolutions
