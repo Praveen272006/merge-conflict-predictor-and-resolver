@@ -1,18 +1,37 @@
-def generate_resolution(old_code, new_code):
+def generate_resolution(risky_lines):
+    """
+    Generate clean AI-based resolution suggestions
+    """
 
-    old_code = old_code.strip()
-    new_code = new_code.strip()
+    suggestions = []
 
-    # Case 1: variable naming improvement
-    if old_code.replace("qty", "quantity") == new_code:
-        return new_code
+    for r in risky_lines[:5]:  # limit output
 
-    # Case 2: whitespace only change
-    if old_code.replace(" ", "") == new_code.replace(" ", ""):
-        return new_code
+        old_code = r.get("old_code", "").strip()
+        new_code = r.get("new_code", "").strip()
 
-    # Case 3: prefer longer (more descriptive)
-    if len(new_code) > len(old_code):
-        return new_code
+        # Skip useless entries
+        if not old_code and not new_code:
+            continue
 
-    return old_code
+        # Smart decision
+        if old_code and new_code:
+            fix = new_code
+            reason = "Updated logic detected"
+        elif new_code:
+            fix = new_code
+            reason = "New code added"
+        else:
+            fix = old_code
+            reason = "Code removal detected"
+
+        suggestions.append({
+            "file": r["file"],
+            "line": r["line"],
+            "old": old_code or "N/A",
+            "new": new_code or "N/A",
+            "fix": fix,
+            "reason": reason
+        })
+
+    return suggestions

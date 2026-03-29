@@ -1,16 +1,27 @@
-def explain_risk(features):
+def explain_prediction(features):
+    """
+    Generate human-readable explanation for risk prediction
+    """
+
     reasons = []
 
-    if features["files_changed"] > 5:
-        reasons.append("Many files modified")
+    if features["commit_frequency"] > 3:
+        reasons.append("• High commit frequency detected")
 
-    if features["total_changes"] > 300:
-        reasons.append("Large code changes")
+    if features["change_density"] > 50:
+        reasons.append("• Large number of code changes")
 
-    if features["multi_file_change"]:
-        reasons.append("Multi-file commit increases conflict chance")
+    if features["file_modification_frequency"] > 5:
+        reasons.append("• Multiple files modified")
 
-    if features["merge_activity"]:
-        reasons.append("Recent merge activity detected")
+    if features["repository_activity"] > 3:
+        reasons.append("• High repository activity")
 
-    return reasons
+    if features["developer_interaction"] > 1:
+        reasons.append("• Multiple developers involved")
+
+    # fallback
+    if not reasons:
+        reasons.append("• Recent merge activity detected")
+
+    return "\n".join(reasons)
