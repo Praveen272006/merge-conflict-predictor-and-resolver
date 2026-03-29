@@ -1,4 +1,5 @@
 import re
+import difflib
 
 
 # =========================
@@ -45,7 +46,6 @@ def smart_merge(line_a, line_b):
 
     mapping = detect_variable_mapping(a, b)
 
-    # Prefer updated (new) line
     if len(b) >= len(a):
         return apply_mapping(b, mapping)
     else:
@@ -85,7 +85,24 @@ def merge_blocks(old_block, new_block):
 
 
 # =========================
-# MAIN ENGINE
+# VISUAL DIFF
+# =========================
+def generate_diff(old_code, new_code):
+
+    old_lines = old_code.split("\n")
+    new_lines = new_code.split("\n")
+
+    diff = difflib.unified_diff(
+        old_lines,
+        new_lines,
+        lineterm=""
+    )
+
+    return "\n".join(diff)
+
+
+# =========================
+# MAIN ENGINE (ONE OUTPUT PER FILE)
 # =========================
 def generate_resolution(commit_data):
 
@@ -102,69 +119,52 @@ def generate_resolution(commit_data):
 
         lines = patch.split("\n")
 
-        line_number = 0
-        old_block = []
-        new_block = []
-        block_start = 0
+        old_all = []
+        new_all = []
+
+        line_start = None
+        line_end = None
 
         for line in lines:
 
-            # HUNK HEADER
             if line.startswith("@@"):
                 parts = line.split(" ")
                 new_info = parts[2]
-                line_number = int(new_info.split(",")[0].replace("+", ""))
+                start_line = int(new_info.split(",")[0].replace("+", ""))
 
-                old_block = []
-                new_block = []
+                if line_start is None:
+                    line_start = start_line
+
+                line_end = start_line
                 continue
 
-            # REMOVED → Branch A
             if line.startswith("-") and not line.startswith("---"):
-                if not old_block:
-                    block_start = line_number
-                old_block.append(line[1:].strip())
+                old_all.append(line[1:].strip())
 
-            # ADDED → Branch B
             elif line.startswith("+") and not line.startswith("+++"):
-                if not new_block:
-                    block_start = line_number
-                new_block.append(line[1:].strip())
+                new_all.append(line[1:].strip())
 
             else:
-                # PROCESS BLOCK
-                if old_block or new_block:
+                if line_end is not None:
+                    line_end += 1
 
-                    merged = merge_blocks(old_block, new_block)
+        if old_all or new_all:
 
-                    resolutions.append({
-                        "file": filename,
-                        "line": str(block_start),
-                        "issue": "Conflicting logic",
-                        "old_code": "\n".join(old_block),
-                        "new_code": "\n".join(new_block),
-                        "fix": merged,
-                        "explanation": "AI compared both branches and generated the best merged version"
-                    })
+            old_code = "\n".join(old_all) if old_all else "[no code]"
+            new_code = "\n".join(new_all) if new_all else "[no code]"
 
-                    old_block = []
-                    new_block = []
-
-                line_number += 1
-
-        # LAST BLOCK
-        if old_block or new_block:
-
-            merged = merge_blocks(old_block, new_block)
+            merged = merge_blocks(old_all, new_all)
+            diff_text = generate_diff(old_code, new_code)
 
             resolutions.append({
                 "file": filename,
-                "line": str(block_start),
+                "line": f"{line_start}-{line_end}",
                 "issue": "Conflicting logic",
-                "old_code": "\n".join(old_block),
-                "new_code": "\n".join(new_block),
+                "old_code": old_code,
+                "new_code": new_code,
                 "fix": merged,
-                "explanation": "AI compared both branches and generated the best merged version"
+                "diff": diff_text,
+                "explanation": "AI combined all changes and generated the best merged solution"
             })
 
     return resolutions
