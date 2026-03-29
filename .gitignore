@@ -1,0 +1,19 @@
+# Environment secrets
+.env
+
+# Python cache
+__pycache__/
+*.pyc
+
+# Large datasets
+data/*.csv
+
+# Cloned repositories
+repositories/
+jenkins-demo/
+
+# ML models
+*.pkl
+
+# VS Code settings
+.vscode/
