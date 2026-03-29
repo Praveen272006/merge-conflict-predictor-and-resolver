@@ -76,26 +76,27 @@ async def github_webhook(request: Request):
         risky_text = "• No risky lines"
 
     # =========================
-    # RESOLUTION TEXT
+    # RESOLUTION OUTPUT
     # =========================
     resolution_text = ""
 
     for r in resolutions:
-
-        code = r["code"] if r["code"].strip() else "[empty line]"
-        fix = r["fix"]
 
         resolution_text += f"""
 📄 File: {r['file']}
 📍 Line: {r['line']}
 ⚠️ Issue: {r['issue']}
 
-💻 Code:
-{code}
+💻 Code for Branch A:
+{r['old_code']}
+
+
+💻 Code for Branch B:
+{r['new_code']}
 
 
 🛠 Suggested Fix:
-{fix}
+{r['fix']}
 
 
 💡 Explanation:
