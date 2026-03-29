@@ -1,8 +1,9 @@
 from fastapi import FastAPI, Request
+import html
+
 from api.github_fetcher import get_commit_changes
 from api.github_bot import post_commit_comment
 
-from model.line_analyzer import detect_risky_lines
 from model.risk_engine import predict_risk
 from model.fusion_engine import calculate_conflict_score
 from model.explainer import explain_prediction
@@ -26,13 +27,13 @@ async def github_webhook(request: Request):
 
     latest_commit_sha = commits[-1]["id"]
 
-    all_risky = []
     total_changes = 0
     total_files = 0
 
-    # 🔥 PROCESS ALL COMMITS
+    # =========================
+    # PROCESS COMMITS
+    # =========================
     for commit in commits:
-
         sha = commit["id"]
         commit_data = get_commit_changes(repo_name, sha)
 
@@ -43,7 +44,9 @@ async def github_webhook(request: Request):
         for f in files:
             total_changes += f.get("changes", 0)
 
-    # 🔥 FEATURES
+    # =========================
+    # FEATURES
+    # =========================
     features = {
         "commit_frequency": len(commits),
         "change_density": total_changes,
@@ -59,16 +62,18 @@ async def github_webhook(request: Request):
     graph = build_dev_graph(commits)
     signals = calculate_signals(commits, total_files, total_changes)
 
-    # 🔥 RESOLUTION DATA (THIS FIXES BOTH ISSUES)
+    # =========================
+    # RESOLUTION DATA
+    # =========================
     commit_data_latest = get_commit_changes(repo_name, latest_commit_sha)
     resolutions = generate_resolution(commit_data_latest)
 
     # =========================
-    # 🔥 FIX 1: RISKY AREAS (ALL FILES)
+    # RISKY AREAS
     # =========================
     risky_text = ""
 
-    for r in resolutions:   # ❗ NO LIMIT
+    for r in resolutions:
         action = "New logic added" if r["type"] == "ADDED" else "Old logic removed"
         risky_text += f"• {r['file']} (Line {r['line']}) → {action}\n"
 
@@ -76,43 +81,60 @@ async def github_webhook(request: Request):
         risky_text = "• No risky lines"
 
     # =========================
-    # 🔥 FIX 2: RESOLUTION (CODE ALWAYS VISIBLE)
+    # RESOLUTION OUTPUT (FIXED)
     # =========================
-    import html
     resolution_text = ""
 
     for r in resolutions:
 
         symbol = "🟢" if r["type"] == "ADDED" else "🔴"
 
-        code_line = r["code"]
-        if code_line =="whitespace":
-            display_code="whitespace"
+        code_line = r.get("code", "")
+
+        # Detect language
+        file = r["file"]
+        if file.endswith(".html"):
+            lang = "html"
+        elif file.endswith(".css"):
+            lang = "css"
+        elif file.endswith(".js"):
+            lang = "javascript"
+        elif file.endswith(".py"):
+            lang = "python"
+        else:
+            lang = "text"
+
+        # Handle code safely
+        if code_line == "whitespace":
+            display_code = "whitespace"
         else:
             display_code = html.escape(code_line)
-            if display_code.strip()=="":
+            display_code = display_code.replace("```", "`")
+
+            if display_code.strip() == "":
                 display_code = "[empty line]"
-        resolution_text += f"""
-        📄 File: {r['file']}
-        📍 Line: {r['line']}
-        ⚠️ Issue: {r['issue']}
-{symbol} Code:
-```test
-{display_code}
 
-🛠 Suggested Fix:
-{r['fix']}
+        # 🔥 SAFE STRING (NO SYNTAX ERROR)
+        resolution_text += (
+            f"\n📄 File: {r['file']}\n"
+            f"📍 Line: {r['line']}\n"
+            f"⚠️ Issue: {r['issue']}\n\n"
+            f"{symbol} Code:\n"
+            f"```{lang}\n"
+            f"{display_code}\n"
+            f"```\n\n"
+            f"🛠 Suggested Fix:\n{r['fix']}\n\n"
+            f"💡 Explanation:\n{r['explanation']}\n"
+            f"----------------------------------\n"
+        )
 
-💡 Explanation:
-{r['explanation']}
-
-----------------------------------
-"""
-
+    # =========================
+    # GRAPH
+    # =========================
     graph_text = "\n".join(graph[:5]) if graph else "• Single developer"
 
     # =========================
-    # 🔥 FINAL COMMENT
+    # FINAL COMMENT
     # =========================
     comment = f"""
 🚀 AI Merge Conflict Analysis
@@ -152,6 +174,9 @@ async def github_webhook(request: Request):
 • Merge Commit: {signals['merge']}
 """
 
+    # =========================
+    # POST TO GITHUB
+    # =========================
     post_commit_comment(repo_name, latest_commit_sha, comment)
 
     return {"status": "success"}
