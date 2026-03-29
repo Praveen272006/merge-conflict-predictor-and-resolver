@@ -1,17 +1,12 @@
 import requests
-from dotenv import load_dotenv
 import os
+from dotenv import load_dotenv
 
 load_dotenv()
-
 GITHUB_TOKEN = os.getenv("GITHUB_TOKEN")
 
 
 def get_commit_changes(repo_name, sha):
-    """
-    Returns:
-    files_changed, total_changes, full_commit_data
-    """
 
     url = f"https://api.github.com/repos/{repo_name}/commits/{sha}"
 
@@ -31,9 +26,6 @@ def get_commit_changes(repo_name, sha):
     files = data.get("files", [])
 
     files_changed = len(files)
-
-    total_changes = 0
-    for f in files:
-        total_changes += f.get("additions", 0) + f.get("deletions", 0)
+    total_changes = sum(f.get("changes", 0) for f in files)
 
     return files_changed, total_changes, data
