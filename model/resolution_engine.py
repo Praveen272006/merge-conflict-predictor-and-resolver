@@ -16,7 +16,6 @@ def detect_variable_mapping(a, b):
     tokens_b = tokenize(b)
 
     mapping = {}
-
     for x, y in zip(tokens_a, tokens_b):
         if x != y:
             mapping[x] = y
@@ -46,10 +45,11 @@ def smart_merge(line_a, line_b):
 
     mapping = detect_variable_mapping(a, b)
 
-    if len(a) < len(b):
-        return apply_mapping(a, mapping)
-    else:
+    # Prefer updated (new) line
+    if len(b) >= len(a):
         return apply_mapping(b, mapping)
+    else:
+        return apply_mapping(a, mapping)
 
 
 # =========================
@@ -69,10 +69,19 @@ def merge_blocks(old_block, new_block):
             merged_lines.append(smart_merge(old_line, new_line))
         elif new_line:
             merged_lines.append(new_line)
-        else:
+        elif old_line:
             merged_lines.append(old_line)
 
-    return "\n".join(merged_lines)
+    # REMOVE DUPLICATES
+    final = []
+    seen = set()
+
+    for line in merged_lines:
+        if line and line not in seen:
+            seen.add(line)
+            final.append(line)
+
+    return "\n".join(final)
 
 
 # =========================
@@ -98,9 +107,6 @@ def generate_resolution(commit_data):
         new_block = []
         block_start = 0
 
-        # 🔥 FINAL MERGED RESULT FOR FILE
-        final_merged_lines = []
-
         for line in lines:
 
             # HUNK HEADER
@@ -113,13 +119,13 @@ def generate_resolution(commit_data):
                 new_block = []
                 continue
 
-            # REMOVED
+            # REMOVED → Branch A
             if line.startswith("-") and not line.startswith("---"):
                 if not old_block:
                     block_start = line_number
                 old_block.append(line[1:].strip())
 
-            # ADDED
+            # ADDED → Branch B
             elif line.startswith("+") and not line.startswith("+++"):
                 if not new_block:
                     block_start = line_number
@@ -130,7 +136,16 @@ def generate_resolution(commit_data):
                 if old_block or new_block:
 
                     merged = merge_blocks(old_block, new_block)
-                    final_merged_lines.append(merged)
+
+                    resolutions.append({
+                        "file": filename,
+                        "line": str(block_start),
+                        "issue": "Conflicting logic",
+                        "old_code": "\n".join(old_block),
+                        "new_code": "\n".join(new_block),
+                        "fix": merged,
+                        "explanation": "AI compared both branches and generated the best merged version"
+                    })
 
                     old_block = []
                     new_block = []
@@ -139,22 +154,17 @@ def generate_resolution(commit_data):
 
         # LAST BLOCK
         if old_block or new_block:
+
             merged = merge_blocks(old_block, new_block)
-            final_merged_lines.append(merged)
-
-        # 🔥 ONLY ONE OUTPUT PER FILE
-        if final_merged_lines:
-
-            final_code = "\n".join(final_merged_lines)
 
             resolutions.append({
                 "file": filename,
-                "line": 1,
-                "type": "MERGED",
+                "line": str(block_start),
                 "issue": "Conflicting logic",
-                "code": final_code,
-                "fix": final_code,
-                "explanation": "AI merged all conflicting changes into a single optimized solution"
+                "old_code": "\n".join(old_block),
+                "new_code": "\n".join(new_block),
+                "fix": merged,
+                "explanation": "AI compared both branches and generated the best merged version"
             })
 
     return resolutions
