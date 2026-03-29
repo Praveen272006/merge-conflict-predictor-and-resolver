@@ -81,7 +81,6 @@ async def github_webhook(request: Request):
     resolution_text = ""
 
     for r in resolutions:
-
         resolution_text += f"""
 📄 File: {r['file']}
 📍 Line: {r['line']}
@@ -90,19 +89,17 @@ async def github_webhook(request: Request):
 💻 Code for Branch A:
 {r['old_code']}
 
-
 💻 Code for Branch B:
 {r['new_code']}
 
-
+🔍 Visual Diff:
+```diff
+{r['diff']}
+```
 🛠 Suggested Fix:
 {r['fix']}
-
-
 💡 Explanation:
 {r['explanation']}
-
-----------------------------------
 """
 
     graph_text = "\n".join(graph[:5]) if graph else "• Single developer"
@@ -114,31 +111,16 @@ async def github_webhook(request: Request):
 🚀 AI Merge Conflict Analysis
 
 🔥 Risk Level: {risk}
-📊 Probability: {round(prob,2)}
-⚡ Conflict Score: {round(score,2)}
-
-----------------------------------
-
+📊 Probability: {round(prob, 2)}
+⚡ Conflict Score: {round(score, 2)}
 ⚠️ Why Risk:
 {reasons}
-
-----------------------------------
-
 📂 Risky Areas:
 {risky_text}
-
-----------------------------------
-
 👥 Developer Interaction:
 {graph_text}
-
-----------------------------------
-
 🛠 Conflict Resolution Suggestions:
 {resolution_text}
-
-----------------------------------
-
 📊 Signals:
 • Files Changed: {signals['files_changed']}
 • Total Changes: {signals['total_changes']}
@@ -149,5 +131,4 @@ async def github_webhook(request: Request):
 """
 
     post_commit_comment(repo_name, latest_sha, comment)
-
     return {"status": "success"}
