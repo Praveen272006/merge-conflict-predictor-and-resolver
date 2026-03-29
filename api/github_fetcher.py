@@ -8,10 +8,6 @@ GITHUB_TOKEN = os.getenv("GITHUB_TOKEN")
 
 
 def get_commit_changes(repo_name, sha):
-    """
-    Fetch full commit details from GitHub API
-    """
-
     url = f"https://api.github.com/repos/{repo_name}/commits/{sha}"
 
     headers = {
@@ -25,5 +21,4 @@ def get_commit_changes(repo_name, sha):
         print("GitHub API error:", response.status_code)
         return {}
 
-    # ✅ IMPORTANT: return FULL JSON only (not tuple)
     return response.json()

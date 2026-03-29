@@ -2,11 +2,10 @@ from fastapi import FastAPI, Request
 from api.github_fetcher import get_commit_changes
 from model.line_analyzer import detect_risky_lines
 from model.risk_engine import predict_risk
-from model.explainer import explain_prediction
 from model.fusion_engine import calculate_conflict_score
+from model.explainer import explain_prediction
 from model.dev_graph import build_dev_graph
-from model.resolution_engine import generate_resolution
-from api.github_bot import post_comment
+from api.github_bot import post_commit_comment
 
 app = FastAPI()
 
@@ -16,173 +15,71 @@ async def github_webhook(request: Request):
 
     payload = await request.json()
 
-    try:
-        repo_name = payload["repository"]["full_name"]
-        commits = payload.get("commits", [])
-
-    except Exception:
-        return {"message": "Invalid payload"}
+    repo_name = payload["repository"]["full_name"]
+    commits = payload.get("commits", [])
 
     if not commits:
-        return {"message": "No commits found"}
+        return {"msg": "No commits"}
 
     all_risky = []
-    total_files_changed = 0
     total_changes = 0
+    total_files = 0
 
-    # ==========================================
-    # FETCH COMMIT DETAILS
-    # ==========================================
+    # ✅ IMPORTANT FIX → always use correct commit SHA
+    latest_commit_sha = commits[-1]["id"]
+
     for commit in commits:
 
         sha = commit["id"]
+        commit_data = get_commit_changes(repo_name, sha)
 
-        commit_details = get_commit_changes(repo_name, sha)
-
-        if not commit_details:
-            continue
-
-        # risky lines
-        risky = detect_risky_lines(commit_details)
+        risky = detect_risky_lines(commit_data)
         all_risky.extend(risky)
 
-        # stats
-        files = commit_details.get("files", [])
-        total_files_changed += len(files)
+        files = commit_data.get("files", [])
+        total_files += len(files)
 
         for f in files:
             total_changes += f.get("changes", 0)
 
-    # ==========================================
-    # FEATURE ENGINEERING
-    # ==========================================
     features = {
         "commit_frequency": len(commits),
         "change_density": total_changes,
-        "file_modification_frequency": total_files_changed,
+        "file_modification_frequency": total_files,
         "repository_activity": len(commits),
         "developer_interaction": len(commits)
     }
 
-    # ==========================================
-    # AI PREDICTION
-    # ==========================================
     prob, risk = predict_risk(features)
-
+    score = calculate_conflict_score(features)
     reasons = explain_prediction(features)
 
-    # ==========================================
-    # CONFLICT SCORE
-    # ==========================================
-    score = calculate_conflict_score(features)
+    graph = build_dev_graph(commits)
 
-    # ==========================================
-    # DEVELOPER GRAPH
-    # ==========================================
-    simple_commits = []
+    risky_text = "\n".join(
+        [f"{r['file']} (Line {r['line']})" for r in all_risky[:5]]
+    ) or "No risky lines"
 
-    for c in commits:
-        simple_commits.append({
-            "author": {"name": c.get("author", {}).get("name", "unknown")},
-            "modified": c.get("modified", [])
-        })
-
-    dev_graph = build_dev_graph(simple_commits)
-
-    if dev_graph:
-        graph_text = "\n".join([f"• {g}" for g in dev_graph[:5]])
-    else:
-        graph_text = "• Single developer activity detected (low conflict risk)"
-
-    # ==========================================
-    # LIMIT RISKY AREAS
-    # ==========================================
-    MAX_LINES = 8
-
-    risky_text = ""
-
-    for r in all_risky[:MAX_LINES]:
-        risky_text += f"• {r['file']} (Line {r['line']})\n"
-
-    if not risky_text:
-        risky_text = "• No risky lines detected"
-
-    # ==========================================
-    # AI RESOLUTION
-    # ==========================================
-    resolutions = generate_resolution(all_risky)
-
-    resolution_text = ""
-
-    for s in resolutions:
-
-        resolution_text += f"""
-📁 {s['file']} | Line {s['line']}
-
-🔴 Old: {s['old']}
-🟢 New: {s['new']}
-✅ Suggested Fix: {s['fix']}
-💡 Reason: {s['reason']}
-
-"""
-
-    if not resolution_text:
-        resolution_text = "No fixes required"
-
-    # ==========================================
-    # FINAL COMMENT
-    # ==========================================
-    ratio = round(total_changes / (total_files_changed + 1), 2)
+    graph_text = "\n".join(graph[:5]) if graph else "Single developer"
 
     comment = f"""
-🤖 **AI Merge Conflict Analysis**
+🚀 AI Merge Conflict Analysis
 
-🔥 Risk Level: {risk}
-📊 Probability: {round(prob, 2)}
-⚡ Conflict Score: {round(score, 2)}
+🔥 Risk: {risk}
+📊 Probability: {round(prob,2)}
+⚡ Score: {round(score,2)}
 
---------------------------------------
-
-⚠️ **Why Risk?**
+Why:
 {reasons}
 
---------------------------------------
-
-📂 **Top Risky Areas**
+Risky Areas:
 {risky_text}
 
---------------------------------------
-
-🤝 **Developer Interaction**
+Developer Graph:
 {graph_text}
-
---------------------------------------
-
-⚡ **AI Suggested Fixes**
-{resolution_text}
-
---------------------------------------
-
-📊 **Signals**
-• Files Changed: {total_files_changed}
-• Total Changes: {total_changes}
-• Change Density: {ratio}
-
---------------------------------------
-
-🚀 Generated by Merge Conflict Predictor AI
 """
 
-    # ==========================================
-    # POST COMMENT TO GITHUB
-    # ==========================================
-    try:
-        pr_number = payload.get("pull_request", {}).get("number")
+    # ✅ FINAL COMMENT POST
+    post_commit_comment(repo_name, latest_commit_sha, comment)
 
-        if pr_number:
-            post_comment(repo_name, pr_number, comment)
-
-    except Exception as e:
-        print("Comment failed:", e)
-
-    return {"message": "Analysis complete"}
+    return {"status": "comment posted"}
