@@ -1,23 +1,22 @@
 from collections import defaultdict
 
-dev_map = defaultdict(set)
+def build_dev_graph(commits):
+    file_dev_map = defaultdict(set)
 
-def update_dev_graph(commits):
     for commit in commits:
         author = commit.get("author", {}).get("name", "unknown")
 
         for file in commit.get("modified", []):
             filename = file.get("filename")
-            dev_map[filename].add(author)
+            file_dev_map[filename].add(author)
 
-def get_conflict_risk_from_graph():
-    risk_files = []
+    graph = []
 
-    for file, devs in dev_map.items():
+    for file, devs in file_dev_map.items():
+        devs = list(devs)
         if len(devs) > 1:
-            risk_files.append({
-                "file": file,
-                "developers": list(devs)
-            })
+            for i in range(len(devs)):
+                for j in range(i + 1, len(devs)):
+                    graph.append(f"{devs[i]} --- {file} --- {devs[j]}")
 
-    return risk_files
+    return graph

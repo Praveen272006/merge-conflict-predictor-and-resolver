@@ -1,35 +1,18 @@
-def generate_resolution(head_code, incoming_code):
-    """
-    AI Merge Conflict Resolution Generator
-    """
+def generate_resolution(old_code, new_code):
 
-    if not head_code:
-        return {
-            "solution": incoming_code,
-            "reason": "Only incoming change exists"
-        }
+    old_code = old_code.strip()
+    new_code = new_code.strip()
 
-    if not incoming_code:
-        return {
-            "solution": head_code,
-            "reason": "Only HEAD version exists"
-        }
+    # Case 1: variable naming improvement
+    if old_code.replace("qty", "quantity") == new_code:
+        return new_code
 
-    # Prefer meaningful variable names
-    if "qty" in head_code and "quantity" in incoming_code:
-        return {
-            "solution": incoming_code,
-            "reason": "More descriptive variable used"
-        }
+    # Case 2: whitespace only change
+    if old_code.replace(" ", "") == new_code.replace(" ", ""):
+        return new_code
 
-    # Prefer longer logic
-    if len(incoming_code) > len(head_code):
-        return {
-            "solution": incoming_code,
-            "reason": "Incoming code more complete"
-        }
+    # Case 3: prefer longer (more descriptive)
+    if len(new_code) > len(old_code):
+        return new_code
 
-    return {
-        "solution": head_code,
-        "reason": "HEAD version retained"
-    }
+    return old_code

@@ -1,33 +1,13 @@
-def compute_conflict_score(
-    files_changed,
-    total_changes,
-    ratio,
-    commit_frequency,
-    repo_activity,
-    dev_conflicts
-):
-    """
-    Behavioral Conflict Fusion Engine
-    """
+def compute_conflict_score(features):
 
-    w1 = 0.2   # Commit Frequency
-    w2 = 0.25  # Change Density
-    w3 = 0.2   # File Modification
-    w4 = 0.15  # Repo Activity
-    w5 = 0.2   # Developer Interaction
+    CF = features.get("commit_frequency", 1)
+    CD = features.get("change_density", 1)
+    FMF = features.get("file_mod_freq", 1)
+    RA = features.get("repo_activity", 1)
+    DI = features.get("dev_interaction", 1)
 
-    CF = commit_frequency
-    CD = ratio
-    FMF = total_changes / 100
-    RA = repo_activity
-    DI = len(dev_conflicts)
+    w1, w2, w3, w4, w5 = 0.2, 0.25, 0.2, 0.15, 0.2
 
-    score = (
-        (w1 * CF) +
-        (w2 * CD) +
-        (w3 * FMF) +
-        (w4 * RA) +
-        (w5 * DI)
-    )
+    score = (w1 * CF) + (w2 * CD) + (w3 * FMF) + (w4 * RA) + (w5 * DI)
 
-    return score
+    return round(score, 2)
