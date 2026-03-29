@@ -78,6 +78,7 @@ async def github_webhook(request: Request):
     # =========================
     # 🔥 FIX 2: RESOLUTION (CODE ALWAYS VISIBLE)
     # =========================
+    import html
     resolution_text = ""
 
     for r in resolutions:
@@ -85,19 +86,19 @@ async def github_webhook(request: Request):
         symbol = "🟢" if r["type"] == "ADDED" else "🔴"
 
         code_line = r["code"]
-
-        # Escape backticks (important for GitHub)
-        code_line = code_line.replace("```", "`")
-
-        if not code_line.strip():
-            code_line = "[empty line]"
-
+        if code_line =="whitespace":
+            display_code="whitespace"
+        else:
+            display_code = html.escape(code_line)
+            if display_code.strip()=="":
+                display_code = "[empty line]"
         resolution_text += f"""
-📄 File: {r['file']}
-📍 Line: {r['line']}
-⚠️ Issue: {r['issue']}
-
+        📄 File: {r['file']}
+        📍 Line: {r['line']}
+        ⚠️ Issue: {r['issue']}
 {symbol} Code:
+```test
+{display_code}
 
 🛠 Suggested Fix:
 {r['fix']}
