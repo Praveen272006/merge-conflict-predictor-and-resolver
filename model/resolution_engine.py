@@ -1,29 +1,21 @@
 def generate_resolution(risky_lines):
-    """
-    Generate clean AI-based resolution suggestions
-    """
 
     suggestions = []
 
-    for r in risky_lines[:5]:  # limit output
+    for r in risky_lines[:5]:
 
-        old_code = r.get("old_code", "").strip()
-        new_code = r.get("new_code", "").strip()
+        old_code = r.get("old_code", "")
+        new_code = r.get("new_code", "")
 
-        # Skip useless entries
-        if not old_code and not new_code:
-            continue
-
-        # Smart decision
         if old_code and new_code:
             fix = new_code
-            reason = "Updated logic detected"
+            reason = "Updated logic"
         elif new_code:
             fix = new_code
-            reason = "New code added"
+            reason = "New code"
         else:
             fix = old_code
-            reason = "Code removal detected"
+            reason = "Removed code"
 
         suggestions.append({
             "file": r["file"],

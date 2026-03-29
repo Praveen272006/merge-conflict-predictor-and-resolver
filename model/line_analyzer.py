@@ -5,6 +5,7 @@ def detect_risky_lines(commit_details):
     files = commit_details.get("files", [])
 
     for file in files:
+
         filename = file.get("filename")
         patch = file.get("patch")
 
@@ -13,32 +14,30 @@ def detect_risky_lines(commit_details):
 
         lines = patch.split("\n")
         line_number = 0
+
         old_code = ""
+        new_code = ""
 
         for line in lines:
 
             if line.startswith("@@"):
                 parts = line.split(" ")
-                new_info = parts[2]
-                line_number = int(new_info.split(",")[0][1:])
+                line_number = int(parts[2].split(",")[0][1:])
                 continue
 
             if line.startswith("-") and not line.startswith("---"):
-                old_code = line[1:].strip()
+                old_code = line[1:]
 
-            elif line.startswith("+") and not line.startswith("+++"):
-                new_code = line[1:].strip()
+            if line.startswith("+") and not line.startswith("+++"):
+                new_code = line[1:]
 
                 risky.append({
                     "file": filename,
                     "line": line_number,
                     "old_code": old_code,
-                    "new_code": new_code,
-                    "issue": "Code modified"
+                    "new_code": new_code
                 })
 
-                line_number += 1
-            else:
-                line_number += 1
+            line_number += 1
 
     return risky
