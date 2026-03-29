@@ -1,57 +1,31 @@
+import requests
 import os
-import requests
 from dotenv import load_dotenv
-import requests
-import re
-
-def extract_lines(patch):
-    matches = re.findall(r'\@\@ -\d+,\d+ \+(\d+),(\d+) \@\@', patch)
-
-    lines = []
-    for start, length in matches:
-        lines.append((int(start), int(start)+int(length)))
-
-    return lines
-
-def get_commit_files(repo, sha, token):
-
-    url = f"https://api.github.com/repos/{repo}/commits/{sha}"
-
-    headers = {
-        "Authorization": f"token {token}"
-    }
-
-    r = requests.get(url, headers=headers)
-    data = r.json()
-
-    risky = []
-
-    for f in data["files"]:
-        risky.append({
-            "file": f["filename"],
-            "changes": f["changes"],
-            "patch": f.get("patch", "")
-        })
-
-    return risky
 
 load_dotenv()
 
-TOKEN = os.getenv("GITHUB_TOKEN")
+GITHUB_TOKEN = os.getenv("GITHUB_TOKEN")
 
-def post_commit_comment(repo_full_name, commit_sha, message):
 
-    url = f"https://api.github.com/repos/{repo_full_name}/commits/{commit_sha}/comments"
+def post_comment(repo_name, pr_number, comment):
+    """
+    Post comment to GitHub Pull Request
+    """
+
+    url = f"https://api.github.com/repos/{repo_name}/issues/{pr_number}/comments"
 
     headers = {
-        "Authorization": f"token {TOKEN}",
-        "Accept": "application/vnd.github+json"
+        "Authorization": f"token {GITHUB_TOKEN}",
+        "Accept": "application/vnd.github.v3+json"
     }
 
     data = {
-        "body": message
+        "body": comment
     }
 
     response = requests.post(url, headers=headers, json=data)
 
-    print("GitHub response:", response.status_code)
+    if response.status_code == 201:
+        print("✅ Comment posted successfully")
+    else:
+        print("❌ Failed to post comment:", response.status_code, response.text)

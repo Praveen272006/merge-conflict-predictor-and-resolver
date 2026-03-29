@@ -1,14 +1,12 @@
 from fastapi import FastAPI, Request
-
-from model.risk_engine import predict_risk
-from model.explainer import explain_risk
-from model.line_analyzer import detect_risky_lines
-from model.dev_graph import build_dev_graph
-from model.fusion_engine import compute_conflict_score
-from model.resolution_engine import generate_resolution
-
 from api.github_fetcher import get_commit_changes
-from api.github_bot import post_commit_comment
+from model.line_analyzer import detect_risky_lines
+from model.risk_engine import predict_risk
+from model.explainer import explain_prediction
+from model.fusion_engine import calculate_conflict_score
+from model.dev_graph import build_dev_graph
+from model.resolution_engine import generate_resolution
+from api.github_bot import post_comment
 
 app = FastAPI()
 
@@ -16,210 +14,175 @@ app = FastAPI()
 @app.post("/github-webhook")
 async def github_webhook(request: Request):
 
-    try:
-        payload = await request.json()
+    payload = await request.json()
 
-        repo_name = payload.get("repository", {}).get("full_name")
+    try:
+        repo_name = payload["repository"]["full_name"]
         commits = payload.get("commits", [])
 
-        if not repo_name or not commits:
-            return {"status": "no data"}
+    except Exception:
+        return {"message": "Invalid payload"}
 
-        files_changed = 0
-        total_changes = 0
-        all_commit_details = []
+    if not commits:
+        return {"message": "No commits found"}
 
-        # ============================================
-        # FETCH FULL COMMIT DATA
-        # ============================================
-        for commit in commits:
-            sha = commit["id"]
+    all_risky = []
+    total_files_changed = 0
+    total_changes = 0
 
-            try:
-                f, c, details = get_commit_changes(repo_name, sha)
-            except Exception as e:
-                print("Fetch error:", e)
-                f, c, details = 0, 0, {}
+    # ==========================================
+    # FETCH COMMIT DETAILS
+    # ==========================================
+    for commit in commits:
 
-            files_changed += f
-            total_changes += c
-            all_commit_details.append(details)
+        sha = commit["id"]
 
-        ratio = total_changes / max(files_changed, 1)
+        commit_details = get_commit_changes(repo_name, sha)
 
-        large_change = 1 if total_changes > 200 else 0
-        multi_file = 1 if files_changed > 3 else 0
-        merge = 1
+        if not commit_details:
+            continue
 
-        # ============================================
-        # RISK PREDICTION
-        # ============================================
-        prob, level = predict_risk(
-            files_changed,
-            total_changes,
-            ratio,
-            large_change,
-            multi_file,
-            merge
-        )
+        # risky lines
+        risky = detect_risky_lines(commit_details)
+        all_risky.extend(risky)
 
-        reasons = explain_risk({
-            "files_changed": files_changed,
-            "total_changes": total_changes,
-            "multi_file_change": multi_file,
-            "merge_activity": merge
+        # stats
+        files = commit_details.get("files", [])
+        total_files_changed += len(files)
+
+        for f in files:
+            total_changes += f.get("changes", 0)
+
+    # ==========================================
+    # FEATURE ENGINEERING
+    # ==========================================
+    features = {
+        "commit_frequency": len(commits),
+        "change_density": total_changes,
+        "file_modification_frequency": total_files_changed,
+        "repository_activity": len(commits),
+        "developer_interaction": len(commits)
+    }
+
+    # ==========================================
+    # AI PREDICTION
+    # ==========================================
+    prob, risk = predict_risk(features)
+
+    reasons = explain_prediction(features)
+
+    # ==========================================
+    # CONFLICT SCORE
+    # ==========================================
+    score = calculate_conflict_score(features)
+
+    # ==========================================
+    # DEVELOPER GRAPH
+    # ==========================================
+    simple_commits = []
+
+    for c in commits:
+        simple_commits.append({
+            "author": {"name": c.get("author", {}).get("name", "unknown")},
+            "modified": c.get("modified", [])
         })
 
-        reason_text = (
-            "\n".join([f"- {r}" for r in reasons])
-            if reasons else "- No strong signals"
-        )
+    dev_graph = build_dev_graph(simple_commits)
 
-        # ============================================
-        # LINE LEVEL ANALYSIS
-        # ============================================
-        risky_areas = []
+    if dev_graph:
+        graph_text = "\n".join([f"• {g}" for g in dev_graph[:5]])
+    else:
+        graph_text = "• Single developer activity detected (low conflict risk)"
 
-        for details in all_commit_details:
-            try:
-                risky_areas.extend(detect_risky_lines(details))
-            except Exception as e:
-                print("Line analysis error:", e)
+    # ==========================================
+    # LIMIT RISKY AREAS
+    # ==========================================
+    MAX_LINES = 8
 
-        # ============================================
-        # LIMIT OUTPUT (IMPORTANT FIX)
-        # ============================================
-        MAX_LINES = 10
+    risky_text = ""
 
-        risk_area_text = ""
-        resolution_text = ""
+    for r in all_risky[:MAX_LINES]:
+        risky_text += f"• {r['file']} (Line {r['line']})\n"
 
-        for i, r in enumerate(risky_areas[:MAX_LINES]):
+    if not risky_text:
+        risky_text = "• No risky lines detected"
 
-            file = r.get("file")
-            line = r.get("line")
-            old_code = r.get("old_code", "")
-            new_code = r.get("new_code", "")
+    # ==========================================
+    # AI RESOLUTION
+    # ==========================================
+    resolutions = generate_resolution(all_risky)
 
-            risk_area_text += f"\n- {file} (Line {line})"
+    resolution_text = ""
 
-            try:
-                fixed = generate_resolution(old_code, new_code)
-            except:
-                fixed = new_code
+    for s in resolutions:
 
-            resolution_text += f"""
-📂 {file} | Line {line}
+        resolution_text += f"""
+📁 {s['file']} | Line {s['line']}
 
-🔴 Old: {old_code}
-🟢 New: {new_code}
-✅ Fix: {fixed}
+🔴 Old: {s['old']}
+🟢 New: {s['new']}
+✅ Suggested Fix: {s['fix']}
+💡 Reason: {s['reason']}
+
 """
 
-        if len(risky_areas) > MAX_LINES:
-            risk_area_text += f"\n... and {len(risky_areas) - MAX_LINES} more lines"
+    if not resolution_text:
+        resolution_text = "No fixes required"
 
-        if not risk_area_text:
-            risk_area_text = "\n- No risky areas detected"
+    # ==========================================
+    # FINAL COMMENT
+    # ==========================================
+    ratio = round(total_changes / (total_files_changed + 1), 2)
 
-        # ============================================
-        # DEVELOPER GRAPH (FIXED)
-        # ============================================
-        try:
-            dev_graph = build_dev_graph(commits)
-        except Exception as e:
-            print("Dev graph error:", e)
-            dev_graph = []
-
-        graph_text = (
-            "\n".join([f"- {g}" for g in dev_graph])
-            if dev_graph else "- No interaction"
-        )
-
-        # ============================================
-        # CONFLICT SCORE
-        # ============================================
-        features = {
-            "commit_frequency": len(commits),
-            "change_density": ratio,
-            "file_mod_freq": files_changed,
-            "repo_activity": total_changes,
-            "dev_interaction": len(dev_graph)
-        }
-
-        try:
-            conflict_score = compute_conflict_score(features)
-        except:
-            conflict_score = 0
-
-        # ============================================
-        # FINAL COMMENT MESSAGE (CLEAN UI)
-        # ============================================
-        message = f"""
+    comment = f"""
 🤖 **AI Merge Conflict Analysis**
 
-🔥 Risk Level: **{level}**
-📊 Probability: **{prob:.2f}**
-⚡ Conflict Score: **{conflict_score}**
+🔥 Risk Level: {risk}
+📊 Probability: {round(prob, 2)}
+⚡ Conflict Score: {round(score, 2)}
 
-━━━━━━━━━━━━━━━━━━
+--------------------------------------
 
 ⚠️ **Why Risk?**
-{reason_text}
+{reasons}
 
-━━━━━━━━━━━━━━━━━━
+--------------------------------------
 
 📂 **Top Risky Areas**
-{risk_area_text}
+{risky_text}
 
-━━━━━━━━━━━━━━━━━━
+--------------------------------------
 
 🤝 **Developer Interaction**
 {graph_text}
 
-━━━━━━━━━━━━━━━━━━
+--------------------------------------
 
-⚡ **AI Resolution (Top Fixes)**
+⚡ **AI Suggested Fixes**
 {resolution_text}
 
-━━━━━━━━━━━━━━━━━━
+--------------------------------------
 
-📈 **Signals**
-• Files Changed: {files_changed}
+📊 **Signals**
+• Files Changed: {total_files_changed}
 • Total Changes: {total_changes}
-• Ratio: {ratio:.2f}
+• Change Density: {ratio}
 
-━━━━━━━━━━━━━━━━━━
+--------------------------------------
 
-⚡ Generated by **Merge Conflict Predictor AI**
+🚀 Generated by Merge Conflict Predictor AI
 """
 
-        # ============================================
-        # POST COMMENT
-        # ============================================
-        for commit in commits:
-            try:
-                post_commit_comment(repo_name, commit["id"], message)
-            except Exception as e:
-                print("Comment error:", e)
+    # ==========================================
+    # POST COMMENT TO GITHUB
+    # ==========================================
+    try:
+        pr_number = payload.get("pull_request", {}).get("number")
 
-        return {
-            "status": "success",
-            "risk_level": level,
-            "conflict_score": conflict_score
-        }
+        if pr_number:
+            post_comment(repo_name, pr_number, comment)
 
     except Exception as e:
-        print("FATAL ERROR:", e)
-        return {"status": "error", "message": str(e)}
+        print("Comment failed:", e)
 
-
-# ============================================
-# HEALTH CHECK
-# ============================================
-@app.get("/")
-def home():
-    return {
-        "status": "running",
-        "service": "AI Merge Conflict Predictor"
-    }
+    return {"message": "Analysis complete"}
