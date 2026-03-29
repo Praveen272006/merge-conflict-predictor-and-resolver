@@ -1,35 +1,61 @@
-const countEl = document.getElementById("count");
-const incBtn = document.getElementById("increment");
-const decBtn = document.getElementById("decrement");
-const resetBtn = document.getElementById("reset");
+import { create } from 'zustand';
+import { persist } from 'zustand/middleware';
 
-let count = 0;
+export const useTransportStore = create(
+  persist(
+    (set) => ({
+      currentUser: null, // { role: 'owner' | 'driver', name: '...', email: '...' }
+      loginUser: (user) => set({ currentUser: user }),
+      logoutUser: () => set({ currentUser: null }),
+      
+      // Drivers state
+      drivers: [
+        { id: 1, name: 'Gopi', email: 'gopi.@gmail.com', license: 'AG-773X', status: 'Available', currentAssignment: null },
+        { id: 2, name: 'Manoj', email: 'manoj.@gmail.com', license: 'AG-918Z', status: 'Available', currentAssignment: null },
+        { id: 3, name: 'Magesh', email: 'magesh.@gmail.com', license: 'AG-244B', status: 'Assigned', 
+          currentAssignment: { id: 101, customerName: 'Sarah Jenkins', email: 'sarah.j@corp.com', destination: 'Orbital Sector 4' } },
+        { id: 4, name: 'Ramesh', email: 'ramesh.@gmail.com', license: 'AG-505V', status: 'Available', currentAssignment: null },
+      ],
 
-function render() {
-  countEl.textContent = count;
-}
+      // Actions
+      assignRide: (driverId, assignment) => 
+        set((state) => ({
+          drivers: state.drivers.map(driver => 
+            driver.id === driverId 
+              ? { ...driver, status: 'Assigned', currentAssignment: assignment }
+              : driver
+          )
+        })),
 
-incBtn.addEventListener("click", () => {
-  count += 1;
-  render();
-});
+      acceptRide: (driverId) =>
+        set((state) => ({
+          drivers: state.drivers.map(driver =>
+            driver.id === driverId
+              ? { ...driver, status: 'Accepted' }
+              : driver
+          )
+        })),
 
-decBtn.addEventListener("click", () => {
-  count -= 1;
-  render();
-});
-
-resetBtn.addEventListener("click", () => {
-  count = 0;
-  render();
-});
-
-const form = document.getElementById("name-form");
-const nameInput = document.getElementById("name-input");
-const greetingEl = document.getElementById("greeting");
-
-form.addEventListener("submit", (event) => {
-  event.preventDefault();
-  const name = nameInput.value.trim() || "frie nd";
-  greetingEl.textContent = `Hello, ${name}!`;
-});
+      declineRide: (driverId, reason) =>
+        set((state) => ({
+          drivers: state.drivers.map(driver =>
+            driver.id === driverId
+              ? { ...driver, status: 'Declined', declineReason: reason }
+              : driver
+          )
+        })),
+        
+      clearAssignment: (driverId) =>
+        set((state) => ({
+          drivers: state.drivers.map(driver =>
+            driver.id === driverId
+              ? { ...driver, status: 'Available', currentAssignment: null, declineReason: null }
+              : driver
+          )
+        })),
+    }),
+    {
+      name: 'vellore-transport-storage',
+    }
+  )
+);
