@@ -29,38 +29,60 @@ def generate_resolution(commit_details):
             if line.startswith("+++") or line.startswith("---"):
                 continue
 
-            # 🔴 REMOVED
+            # =========================
+            # 🔴 REMOVED CODE
+            # =========================
             if line.startswith("-"):
+
                 code = line[1:]
 
                 if code.strip() == "":
-                    code = "[empty line]"
+                    issue = "Whitespace occurred"
+                    code_display = "whitespace"
+                    fix = "Remove unnecessary blank lines"
+                    explanation = "Extra whitespace may cause formatting inconsistencies"
+                else:
+                    issue = "Old logic removed"
+                    code_display = code
+                    fix = "Verify that removed logic is not required elsewhere"
+                    explanation = "Deleting code may break dependent functionality or features"
 
                 results.append({
                     "file": filename,
                     "line": line_no,
                     "type": "REMOVED",
-                    "code": code,
-                    "issue": "Old logic removed",
-                    "fix": "Ensure removed logic is not required",
-                    "explanation": "Removing code may break existing functionality"
+                    "code": code_display,
+                    "issue": issue,
+                    "fix": fix,
+                    "explanation": explanation
                 })
 
-            # 🟢 ADDED
+            # =========================
+            # 🟢 ADDED CODE
+            # =========================
             elif line.startswith("+"):
+
                 code = line[1:]
 
                 if code.strip() == "":
-                    code = "[empty line]"
+                    issue = "Whitespace occurred"
+                    code_display = "whitespace"
+                    fix = "Avoid adding unnecessary blank lines"
+                    explanation = "Unnecessary whitespace can reduce readability and consistency"
+                else:
+                    issue = "New logic added"
+                    code_display = code
+                    fix = "Ensure compatibility with existing logic and test thoroughly"
+                    explanation = "New code may introduce conflicts or unexpected behavior"
 
                 results.append({
                     "file": filename,
                     "line": line_no,
                     "type": "ADDED",
-                    "code": code,
-                    "issue": "New logic added",
-                    "fix": "Verify compatibility with existing code",
-                    "explanation": "New code may introduce conflicts"
+                    "code": code_display,
+                    "issue": issue,
+                    "fix": fix,
+                    "explanation": explanation
                 })
 
             line_no += 1
