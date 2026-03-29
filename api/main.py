@@ -30,13 +30,12 @@ async def github_webhook(request: Request):
     total_changes = 0
     total_files = 0
 
-    # 🔥 PROCESS ALL COMMITS
+    # 🔥 PROCESS COMMITS
     for commit in commits:
 
         sha = commit["id"]
         commit_data = get_commit_changes(repo_name, sha)
 
-        # Risky lines
         risky = detect_risky_lines(commit_data)
         all_risky.extend(risky)
 
@@ -63,16 +62,22 @@ async def github_webhook(request: Request):
     graph = build_dev_graph(commits)
     signals = calculate_signals(commits, total_files, total_changes)
 
-    # 🔥 GET FULL RESOLUTION DATA
+    # 🔥 RESOLUTION DATA
     commit_data_latest = get_commit_changes(repo_name, latest_commit_sha)
     resolutions = generate_resolution(commit_data_latest)
 
-    # 🔥 FORMAT RESOLUTION OUTPUT
+    # 🔥 FORMAT RESOLUTION OUTPUT (FIXED)
     resolution_text = ""
 
     for r in resolutions:
 
         symbol = "🟢" if r["type"] == "ADDED" else "🔴"
+
+        code_line = r["code"]
+
+        # Ensure code always visible
+        if not code_line or code_line.strip() == "":
+            code_line = "[empty or whitespace line]"
 
         resolution_text += f"""
 📄 File: {r['file']}
@@ -80,7 +85,6 @@ async def github_webhook(request: Request):
 ⚠️ Issue: {r['issue']}
 
 {symbol} Code:
-{r['code']}
 
 🛠 Suggested Fix:
 {r['fix']}
@@ -91,10 +95,9 @@ async def github_webhook(request: Request):
 ----------------------------------
 """
 
-    # 🔥 RISKY AREAS (WITH TYPE)
+    # 🔥 RISKY AREAS (clean)
     risky_text = ""
-
-    for r in resolutions[:20]:  # limit only display here
+    for r in resolutions[:20]:
         action = "New logic added" if r["type"] == "ADDED" else "Old logic removed"
         risky_text += f"• {r['file']} (Line {r['line']}) → {action}\n"
 
@@ -143,7 +146,7 @@ async def github_webhook(request: Request):
 • Merge Commit: {signals['merge']}
 """
 
-    # 🔥 POST COMMENT TO GITHUB
+    # 🔥 POST COMMENT
     post_commit_comment(repo_name, latest_commit_sha, comment)
 
     return {"status": "success"}
