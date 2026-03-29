@@ -4,6 +4,7 @@ from api.github_bot import post_commit_comment
 from model.explainer import explain_risk
 from model.line_analyzer import detect_risky_lines
 from api.github_fetcher import get_commit_changes
+from model.resolution_engine import generate_ai_resolution
 
 app = FastAPI()
 
@@ -61,22 +62,20 @@ async def github_webhook(request: Request):
     total_changes = 0
     all_risky = []
 
-    # 🔥 LOOP THROUGH COMMITS
+    # 🔥 PROCESS EACH COMMIT
     for commit in commits:
         sha = commit["id"]
 
-        # ✅ FIXED (3 VALUES)
         f, c, commit_details = get_commit_changes(repo_name, sha)
 
         files_changed += f
         total_changes += c
 
-        # ✅ LINE ANALYSIS
         risky = detect_risky_lines(commit_details)
         all_risky.extend(risky)
 
     # =====================================================
-    # FEATURES
+    # FEATURE ENGINEERING
     # =====================================================
     ratio = total_changes / max(files_changed, 1)
 
@@ -85,7 +84,7 @@ async def github_webhook(request: Request):
     merge = 1
 
     # =====================================================
-    # PREDICTION
+    # RISK PREDICTION
     # =====================================================
     prob, level = predict_risk(
         files_changed,
@@ -109,38 +108,22 @@ async def github_webhook(request: Request):
     reason_text = "\n".join([f"- {r}" for r in reasons]) if reasons else "- No strong signals"
 
     # =====================================================
-    # RISKY AREAS + RESOLUTION
+    # RISKY AREAS + AI RESOLUTION
     # =====================================================
     risk_area_text = ""
     resolution_text = ""
 
     for r in all_risky:
 
-        file = r["file"]
-        line = r["line"]
+        file = r.get("file")
+        line = r.get("line")
         old_code = r.get("old_code")
         new_code = r.get("new_code")
 
         risk_area_text += f"\n- {file} (Line {line}) → Code modified"
 
-        # 🔥 SMART RESOLUTION
-        if old_code and new_code:
-
-            if old_code.replace(" ", "") == new_code.replace(" ", ""):
-                fix = new_code
-                reason = "Only formatting change → safe merge"
-
-            elif len(new_code) > len(old_code):
-                fix = new_code
-                reason = "New logic more descriptive → prefer new"
-
-            else:
-                fix = old_code
-                reason = "Old logic stable → keep original"
-
-        else:
-            fix = new_code or old_code
-            reason = "Single side change"
+        # 🔥 AI RESOLUTION ENGINE
+        final_code, reason = generate_ai_resolution(old_code, new_code)
 
         resolution_text += f"""
 📂 File: {file}
@@ -153,7 +136,7 @@ async def github_webhook(request: Request):
 {new_code}
 
 ✅ Final Suggested Code:
-{fix}
+{final_code}
 
 💡 Reason:
 {reason}
