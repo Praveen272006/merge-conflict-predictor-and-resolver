@@ -3,7 +3,6 @@ import os
 from dotenv import load_dotenv
 
 load_dotenv()
-
 GITHUB_TOKEN = os.getenv("GITHUB_TOKEN")
 
 
@@ -15,10 +14,10 @@ def get_commit_changes(repo_name, sha):
         "Accept": "application/vnd.github.v3+json"
     }
 
-    response = requests.get(url, headers=headers)
+    res = requests.get(url, headers=headers)
 
-    if response.status_code != 200:
-        print("GitHub API error:", response.status_code)
+    if res.status_code != 200:
+        print("GitHub API error:", res.status_code)
         return {}
 
-    return response.json()
+    return res.json()

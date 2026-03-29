@@ -3,7 +3,6 @@ import os
 from dotenv import load_dotenv
 
 load_dotenv()
-
 GITHUB_TOKEN = os.getenv("GITHUB_TOKEN")
 
 
@@ -16,10 +15,8 @@ def post_commit_comment(repo, commit_sha, comment):
         "Accept": "application/vnd.github.v3+json"
     }
 
-    data = {
-        "body": comment
-    }
+    data = {"body": comment}
 
-    response = requests.post(url, headers=headers, json=data)
+    res = requests.post(url, headers=headers, json=data)
 
-    print("Commit Comment:", response.status_code)
+    print("Commit Comment Status:", res.status_code)

@@ -1,11 +1,14 @@
 from fastapi import FastAPI, Request
 from api.github_fetcher import get_commit_changes
+from api.github_bot import post_commit_comment
+
 from model.line_analyzer import detect_risky_lines
 from model.risk_engine import predict_risk
 from model.fusion_engine import calculate_conflict_score
 from model.explainer import explain_prediction
 from model.dev_graph import build_dev_graph
-from api.github_bot import post_commit_comment
+from model.resolution_engine import generate_resolution
+from model.signals import calculate_signals
 
 app = FastAPI()
 
@@ -21,12 +24,11 @@ async def github_webhook(request: Request):
     if not commits:
         return {"msg": "No commits"}
 
+    latest_commit_sha = commits[-1]["id"]
+
     all_risky = []
     total_changes = 0
     total_files = 0
-
-    # ✅ IMPORTANT FIX → always use correct commit SHA
-    latest_commit_sha = commits[-1]["id"]
 
     for commit in commits:
 
@@ -55,31 +57,53 @@ async def github_webhook(request: Request):
     reasons = explain_prediction(features)
 
     graph = build_dev_graph(commits)
+    resolutions = generate_resolution(all_risky)
+    signals = calculate_signals(commits, total_files, total_changes)
 
     risky_text = "\n".join(
-        [f"{r['file']} (Line {r['line']})" for r in all_risky[:5]]
-    ) or "No risky lines"
+        [f"• {r['file']} (Line {r['line']})" for r in all_risky[:5]]
+    ) or "• No risky lines"
 
-    graph_text = "\n".join(graph[:5]) if graph else "Single developer"
+    graph_text = "\n".join(graph[:5]) if graph else "• Single developer"
 
     comment = f"""
 🚀 AI Merge Conflict Analysis
 
-🔥 Risk: {risk}
+🔥 Risk Level: {risk}
 📊 Probability: {round(prob,2)}
-⚡ Score: {round(score,2)}
+⚡ Conflict Score: {round(score,2)}
 
-Why:
+----------------------------------
+
+⚠️ Why Risk:
 {reasons}
 
-Risky Areas:
+----------------------------------
+
+📂 Risky Areas:
 {risky_text}
 
-Developer Graph:
+----------------------------------
+
+👥 Developer Interaction:
 {graph_text}
+
+----------------------------------
+
+🛠 Conflict Resolution Suggestions:
+{resolutions}
+
+----------------------------------
+
+📊 Signals:
+• Files Changed: {signals['files_changed']}
+• Total Changes: {signals['total_changes']}
+• Change Ratio: {signals['ratio']}
+• Large Change: {signals['large_change']}
+• Multi File Commit: {signals['multi_file']}
+• Merge Commit: {signals['merge']}
 """
 
-    # ✅ FINAL COMMENT POST
     post_commit_comment(repo_name, latest_commit_sha, comment)
 
-    return {"status": "comment posted"}
+    return {"status": "success"}
