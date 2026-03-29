@@ -16,72 +16,93 @@ app = FastAPI()
 @app.post("/github-webhook")
 async def github_webhook(request: Request):
 
-    payload = await request.json()
+    try:
+        payload = await request.json()
 
-    repo_name = payload.get("repository", {}).get("full_name")
-    commits = payload.get("commits", [])
+        repo_name = payload.get("repository", {}).get("full_name")
+        commits = payload.get("commits", [])
 
-    if not repo_name or not commits:
-        return {"status": "no data"}
+        if not repo_name or not commits:
+            return {"status": "no data"}
 
-    files_changed = 0
-    total_changes = 0
-    all_commit_details = []
+        files_changed = 0
+        total_changes = 0
+        all_commit_details = []
 
-    # 🔥 FETCH FULL COMMIT DATA
-    for commit in commits:
-        sha = commit["id"]
+        # ============================================
+        # FETCH FULL COMMIT DATA
+        # ============================================
+        for commit in commits:
+            sha = commit["id"]
 
-        f, c, details = get_commit_changes(repo_name, sha)
+            try:
+                f, c, details = get_commit_changes(repo_name, sha)
+            except Exception as e:
+                print("Fetch error:", e)
+                f, c, details = 0, 0, {}
 
-        files_changed += f
-        total_changes += c
-        all_commit_details.append(details)
+            files_changed += f
+            total_changes += c
+            all_commit_details.append(details)
 
-    ratio = total_changes / max(files_changed, 1)
+        ratio = total_changes / max(files_changed, 1)
 
-    large_change = 1 if total_changes > 200 else 0
-    multi_file = 1 if files_changed > 3 else 0
-    merge = 1
+        large_change = 1 if total_changes > 200 else 0
+        multi_file = 1 if files_changed > 3 else 0
+        merge = 1
 
-    # 🔥 RISK
-    prob, level = predict_risk(
-        files_changed,
-        total_changes,
-        ratio,
-        large_change,
-        multi_file,
-        merge
-    )
+        # ============================================
+        # RISK PREDICTION
+        # ============================================
+        prob, level = predict_risk(
+            files_changed,
+            total_changes,
+            ratio,
+            large_change,
+            multi_file,
+            merge
+        )
 
-    reasons = explain_risk({
-        "files_changed": files_changed,
-        "total_changes": total_changes,
-        "multi_file_change": multi_file,
-        "merge_activity": merge
-    })
+        reasons = explain_risk({
+            "files_changed": files_changed,
+            "total_changes": total_changes,
+            "multi_file_change": multi_file,
+            "merge_activity": merge
+        })
 
-    reason_text = "\n".join([f"- {r}" for r in reasons])
+        reason_text = (
+            "\n".join([f"- {r}" for r in reasons])
+            if reasons else "- No strong signals"
+        )
 
-    # 🔥 LINE ANALYSIS
-    risky_areas = []
-    for details in all_commit_details:
-        risky_areas.extend(detect_risky_lines(details))
+        # ============================================
+        # LINE LEVEL ANALYSIS
+        # ============================================
+        risky_areas = []
 
-    risk_area_text = ""
-    resolution_text = ""
+        for details in all_commit_details:
+            try:
+                risky_areas.extend(detect_risky_lines(details))
+            except Exception as e:
+                print("Line analysis error:", e)
 
-    for r in risky_areas:
-        file = r["file"]
-        line = r["line"]
-        old_code = r["old_code"]
-        new_code = r["new_code"]
+        risk_area_text = ""
+        resolution_text = ""
 
-        risk_area_text += f"\n- {file} (Line {line})"
+        for r in risky_areas:
+            file = r.get("file")
+            line = r.get("line")
+            old_code = r.get("old_code", "")
+            new_code = r.get("new_code", "")
 
-        fixed = generate_resolution(old_code, new_code)
+            risk_area_text += f"\n- {file} (Line {line})"
 
-        resolution_text += f"""
+            try:
+                fixed = generate_resolution(old_code, new_code)
+            except:
+                fixed = new_code
+
+            resolution_text += f"""
 📂 File: {file}
 📍 Line: {line}
 
@@ -95,28 +116,48 @@ async def github_webhook(request: Request):
 {fixed}
 """
 
-    # 🔥 DEV GRAPH
-    dev_graph = build_dev_graph(commits)
-    graph_text = "\n".join([f"- {g}" for g in dev_graph]) if dev_graph else "- No interaction"
+        if not risk_area_text:
+            risk_area_text = "\n- No risky areas detected"
 
-    # 🔥 CONFLICT SCORE
-    features = {
-        "commit_frequency": len(commits),
-        "change_density": ratio,
-        "file_mod_freq": files_changed,
-        "repo_activity": total_changes,
-        "dev_interaction": len(dev_graph)
-    }
+        # ============================================
+        # DEVELOPER GRAPH (FIXED)
+        # ============================================
+        try:
+            dev_graph = build_dev_graph(commits)
+        except Exception as e:
+            print("Dev graph error:", e)
+            dev_graph = []
 
-    conflict_score = compute_conflict_score(features)
+        graph_text = (
+            "\n".join([f"- {g}" for g in dev_graph])
+            if dev_graph else "- No interaction"
+        )
 
-    # 🔥 FINAL MESSAGE
-    message = f"""
-🤖 AI Merge Conflict Analysis
+        # ============================================
+        # CONFLICT SCORE
+        # ============================================
+        features = {
+            "commit_frequency": len(commits),
+            "change_density": ratio,
+            "file_mod_freq": files_changed,
+            "repo_activity": total_changes,
+            "dev_interaction": len(dev_graph)
+        }
 
-🔥 Risk Level: {level}
-📊 Probability: {prob:.2f}
-⚡ Conflict Score: {conflict_score}
+        try:
+            conflict_score = compute_conflict_score(features)
+        except:
+            conflict_score = 0
+
+        # ============================================
+        # FINAL COMMENT MESSAGE
+        # ============================================
+        message = f"""
+🤖 **AI Merge Conflict Analysis**
+
+🔥 Risk Level: **{level}**
+📊 Probability: **{prob:.2f}**
+⚡ Conflict Score: **{conflict_score}**
 
 ---
 
@@ -143,12 +184,37 @@ async def github_webhook(request: Request):
 📈 Signals
 - Files Changed: {files_changed}
 - Total Changes: {total_changes}
-- Ratio: {ratio:.2f}
+- Change Ratio: {ratio:.2f}
 
 ⚡ Generated by Merge Conflict Predictor AI
 """
 
-    for commit in commits:
-        post_commit_comment(repo_name, commit["id"], message)
+        # ============================================
+        # POST COMMENT
+        # ============================================
+        for commit in commits:
+            try:
+                post_commit_comment(repo_name, commit["id"], message)
+            except Exception as e:
+                print("Comment error:", e)
 
-    return {"status": "done"}
+        return {
+            "status": "success",
+            "risk_level": level,
+            "conflict_score": conflict_score
+        }
+
+    except Exception as e:
+        print("FATAL ERROR:", e)
+        return {"status": "error", "message": str(e)}
+
+
+# ============================================
+# HEALTH CHECK
+# ============================================
+@app.get("/")
+def home():
+    return {
+        "status": "running",
+        "service": "AI Merge Conflict Predictor"
+    }
