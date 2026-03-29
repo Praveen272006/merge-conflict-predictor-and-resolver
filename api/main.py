@@ -1,6 +1,4 @@
 from fastapi import FastAPI, Request
-import html
-
 from api.github_fetcher import get_commit_changes
 from api.github_bot import post_commit_comment
 
@@ -25,7 +23,7 @@ async def github_webhook(request: Request):
     if not commits:
         return {"msg": "No commits"}
 
-    latest_commit_sha = commits[-1]["id"]
+    latest_sha = commits[-1]["id"]
 
     total_changes = 0
     total_files = 0
@@ -34,10 +32,8 @@ async def github_webhook(request: Request):
     # PROCESS COMMITS
     # =========================
     for commit in commits:
-        sha = commit["id"]
-        commit_data = get_commit_changes(repo_name, sha)
-
-        files = commit_data.get("files", [])
+        data = get_commit_changes(repo_name, commit["id"])
+        files = data.get("files", [])
 
         total_files += len(files)
 
@@ -63,10 +59,10 @@ async def github_webhook(request: Request):
     signals = calculate_signals(commits, total_files, total_changes)
 
     # =========================
-    # RESOLUTION DATA
+    # RESOLUTION
     # =========================
-    commit_data_latest = get_commit_changes(repo_name, latest_commit_sha)
-    resolutions = generate_resolution(commit_data_latest)
+    latest_data = get_commit_changes(repo_name, latest_sha)
+    resolutions = generate_resolution(latest_data)
 
     # =========================
     # RISKY AREAS
@@ -74,63 +70,40 @@ async def github_webhook(request: Request):
     risky_text = ""
 
     for r in resolutions:
-        action = "New logic added" if r["type"] == "ADDED" else "Old logic removed"
-        risky_text += f"• {r['file']} (Line {r['line']}) → {action}\n"
+        risky_text += f"• {r['file']} (Line {r['line']}) → {r['issue']}\n"
 
     if not risky_text:
         risky_text = "• No risky lines"
 
     # =========================
-    # RESOLUTION OUTPUT (FIXED)
+    # RESOLUTION TEXT
     # =========================
     resolution_text = ""
 
     for r in resolutions:
 
-        symbol = "🟢" if r["type"] == "ADDED" else "🔴"
+        code = r["code"] if r["code"].strip() else "[empty line]"
+        fix = r["fix"]
 
-        code_line = r.get("code", "")
+        resolution_text += f"""
+📄 File: {r['file']}
+📍 Line: {r['line']}
+⚠️ Issue: {r['issue']}
 
-        # Detect language
-        file = r["file"]
-        if file.endswith(".html"):
-            lang = "html"
-        elif file.endswith(".css"):
-            lang = "css"
-        elif file.endswith(".js"):
-            lang = "javascript"
-        elif file.endswith(".py"):
-            lang = "python"
-        else:
-            lang = "text"
+💻 Code:
+{code}
 
-        # Handle code safely
-        if code_line == "whitespace":
-            display_code = "whitespace"
-        else:
-            display_code = html.escape(code_line)
-            display_code = display_code.replace("```", "`")
 
-            if display_code.strip() == "":
-                display_code = "[empty line]"
+🛠 Suggested Fix:
+{fix}
 
-        # 🔥 SAFE STRING (NO SYNTAX ERROR)
-        resolution_text += (
-            f"\n📄 File: {r['file']}\n"
-            f"📍 Line: {r['line']}\n"
-            f"⚠️ Issue: {r['issue']}\n\n"
-            f"{symbol} Code:\n"
-            f"```{lang}\n"
-            f"{display_code}\n"
-            f"```\n\n"
-            f"🛠 Suggested Fix:\n{r['fix']}\n\n"
-            f"💡 Explanation:\n{r['explanation']}\n"
-            f"----------------------------------\n"
-        )
 
-    # =========================
-    # GRAPH
-    # =========================
+💡 Explanation:
+{r['explanation']}
+
+----------------------------------
+"""
+
     graph_text = "\n".join(graph[:5]) if graph else "• Single developer"
 
     # =========================
@@ -174,9 +147,6 @@ async def github_webhook(request: Request):
 • Merge Commit: {signals['merge']}
 """
 
-    # =========================
-    # POST TO GITHUB
-    # =========================
-    post_commit_comment(repo_name, latest_commit_sha, comment)
+    post_commit_comment(repo_name, latest_sha, comment)
 
     return {"status": "success"}
