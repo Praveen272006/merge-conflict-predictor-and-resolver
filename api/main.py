@@ -30,16 +30,14 @@ async def github_webhook(request: Request):
     total_changes = 0
     total_files = 0
 
-    # 🔥 PROCESS COMMITS
+    # 🔥 PROCESS ALL COMMITS
     for commit in commits:
 
         sha = commit["id"]
         commit_data = get_commit_changes(repo_name, sha)
 
-        risky = detect_risky_lines(commit_data)
-        all_risky.extend(risky)
-
         files = commit_data.get("files", [])
+
         total_files += len(files)
 
         for f in files:
@@ -54,7 +52,6 @@ async def github_webhook(request: Request):
         "developer_interaction": len(commits)
     }
 
-    # 🔥 AI OUTPUT
     prob, risk = predict_risk(features)
     score = calculate_conflict_score(features)
     reasons = explain_prediction(features)
@@ -62,11 +59,25 @@ async def github_webhook(request: Request):
     graph = build_dev_graph(commits)
     signals = calculate_signals(commits, total_files, total_changes)
 
-    # 🔥 RESOLUTION DATA
+    # 🔥 RESOLUTION DATA (THIS FIXES BOTH ISSUES)
     commit_data_latest = get_commit_changes(repo_name, latest_commit_sha)
     resolutions = generate_resolution(commit_data_latest)
 
-    # 🔥 FORMAT RESOLUTION OUTPUT (FIXED)
+    # =========================
+    # 🔥 FIX 1: RISKY AREAS (ALL FILES)
+    # =========================
+    risky_text = ""
+
+    for r in resolutions:   # ❗ NO LIMIT
+        action = "New logic added" if r["type"] == "ADDED" else "Old logic removed"
+        risky_text += f"• {r['file']} (Line {r['line']}) → {action}\n"
+
+    if not risky_text:
+        risky_text = "• No risky lines"
+
+    # =========================
+    # 🔥 FIX 2: RESOLUTION (CODE ALWAYS VISIBLE)
+    # =========================
     resolution_text = ""
 
     for r in resolutions:
@@ -75,9 +86,11 @@ async def github_webhook(request: Request):
 
         code_line = r["code"]
 
-        # Ensure code always visible
-        if not code_line or code_line.strip() == "":
-            code_line = "[empty or whitespace line]"
+        # Escape backticks (important for GitHub)
+        code_line = code_line.replace("```", "`")
+
+        if not code_line.strip():
+            code_line = "[empty line]"
 
         resolution_text += f"""
 📄 File: {r['file']}
@@ -95,19 +108,11 @@ async def github_webhook(request: Request):
 ----------------------------------
 """
 
-    # 🔥 RISKY AREAS (clean)
-    risky_text = ""
-    for r in resolutions[:20]:
-        action = "New logic added" if r["type"] == "ADDED" else "Old logic removed"
-        risky_text += f"• {r['file']} (Line {r['line']}) → {action}\n"
-
-    if not risky_text:
-        risky_text = "• No risky lines"
-
-    # 🔥 GRAPH
     graph_text = "\n".join(graph[:5]) if graph else "• Single developer"
 
+    # =========================
     # 🔥 FINAL COMMENT
+    # =========================
     comment = f"""
 🚀 AI Merge Conflict Analysis
 
@@ -146,7 +151,6 @@ async def github_webhook(request: Request):
 • Merge Commit: {signals['merge']}
 """
 
-    # 🔥 POST COMMENT
     post_commit_comment(repo_name, latest_commit_sha, comment)
 
     return {"status": "success"}
