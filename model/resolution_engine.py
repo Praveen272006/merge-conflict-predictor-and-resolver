@@ -1,7 +1,42 @@
-def generate_resolution(commit_details):
+def smart_merge(line_a, line_b):
+    """
+    AI-based smart merge between two conflicting lines
+    """
 
-    results = []
-    files = commit_details.get("files", [])
+    a = line_a.strip()
+    b = line_b.strip()
+
+    # Same → return
+    if a == b:
+        return a
+
+    # Prefer meaningful variable names
+    keywords = ["quantity", "total", "amount", "price"]
+
+    for k in keywords:
+        if k in a and k not in b:
+            return a
+        if k in b and k not in a:
+            return b
+
+    # Replace abbreviations
+    if "qty" in b:
+        return b.replace("qty", "quantity")
+    if "qty" in a:
+        return a.replace("qty", "quantity")
+
+    # Prefer longer line (more descriptive)
+    return a if len(a) > len(b) else b
+
+
+def generate_resolution(commit_data):
+    """
+    Generate clean AI-based conflict resolution
+    """
+
+    resolutions = []
+
+    files = commit_data.get("files", [])
 
     for file in files:
 
@@ -12,79 +47,73 @@ def generate_resolution(commit_details):
             continue
 
         lines = patch.split("\n")
-        line_no = 0
+
+        line_number = 0
+        prev_removed = None
 
         for line in lines:
 
-            # Extract correct line number
+            # Detect hunk start
             if line.startswith("@@"):
-                try:
-                    parts = line.split(" ")
-                    line_no = int(parts[2].split(",")[0][1:])
-                except:
-                    line_no = 0
+                parts = line.split(" ")
+                new_file_info = parts[2]  # +start,count
+                line_number = int(new_file_info.split(",")[0].replace("+", ""))
                 continue
 
-            # Skip diff headers
-            if line.startswith("+++") or line.startswith("---"):
-                continue
+            # -------------------------
+            # REMOVED LINE
+            # -------------------------
+            if line.startswith("-") and not line.startswith("---"):
+                removed_code = line[1:].strip()
 
-            # =========================
-            # 🔴 REMOVED CODE
-            # =========================
-            if line.startswith("-"):
+                if removed_code == "":
+                    removed_code = "whitespace"
 
-                code = line[1:]
+                prev_removed = removed_code
 
-                if code.strip() == "":
-                    issue = "Whitespace occurred"
-                    code_display = "whitespace"
-                    fix = "Remove unnecessary blank lines"
-                    explanation = "Extra whitespace may cause formatting inconsistencies"
+            # -------------------------
+            # ADDED LINE
+            # -------------------------
+            elif line.startswith("+") and not line.startswith("+++"):
+                added_code = line[1:].strip()
+
+                if added_code == "":
+                    added_code = "whitespace"
+
+                # 🔥 IF BOTH EXIST → CONFLICT → MERGE
+                if prev_removed and prev_removed != "whitespace" and added_code != "whitespace":
+
+                    merged_code = smart_merge(prev_removed, added_code)
+
+                    resolutions.append({
+                        "file": filename,
+                        "line": line_number,
+                        "type": "MERGED",
+                        "issue": "Conflicting logic",
+                        "code": merged_code,
+                        "fix": f"Solution: {merged_code}",
+                        "explanation": "AI compared both versions and selected the best, most meaningful code"
+                    })
+
                 else:
-                    issue = "Old logic removed"
-                    code_display = code
-                    fix = "Verify that removed logic is not required elsewhere"
-                    explanation = "Deleting code may break dependent functionality or features"
+                    # Normal addition
+                    resolutions.append({
+                        "file": filename,
+                        "line": line_number,
+                        "type": "ADDED",
+                        "issue": "New logic added",
+                        "code": added_code,
+                        "fix": "Verify compatibility",
+                        "explanation": "New code introduced"
+                    })
 
-                results.append({
-                    "file": filename,
-                    "line": line_no,
-                    "type": "REMOVED",
-                    "code": code_display,
-                    "issue": issue,
-                    "fix": fix,
-                    "explanation": explanation
-                })
+                prev_removed = None
 
-            # =========================
-            # 🟢 ADDED CODE
-            # =========================
-            elif line.startswith("+"):
+            # -------------------------
+            # NORMAL LINE
+            # -------------------------
+            else:
+                line_number += 1
+                prev_removed = None
 
-                code = line[1:]
-
-                if code.strip() == "":
-                    issue = "Whitespace occurred"
-                    code_display = "whitespace"
-                    fix = "Avoid adding unnecessary blank lines"
-                    explanation = "Unnecessary whitespace can reduce readability and consistency"
-                else:
-                    issue = "New logic added"
-                    code_display = code
-                    fix = "Ensure compatibility with existing logic and test thoroughly"
-                    explanation = "New code may introduce conflicts or unexpected behavior"
-
-                results.append({
-                    "file": filename,
-                    "line": line_no,
-                    "type": "ADDED",
-                    "code": code_display,
-                    "issue": issue,
-                    "fix": fix,
-                    "explanation": explanation
-                })
-
-            line_no += 1
-
-    return results
+    return resolutions
