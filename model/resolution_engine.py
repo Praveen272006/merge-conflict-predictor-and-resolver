@@ -1,7 +1,6 @@
 def generate_resolution(commit_details):
 
     results = []
-
     files = commit_details.get("files", [])
 
     for file in files:
@@ -17,84 +16,53 @@ def generate_resolution(commit_details):
 
         for line in lines:
 
+            # Extract correct line number
             if line.startswith("@@"):
-                parts = line.split(" ")
-                line_no = int(parts[2].split(",")[0][1:])
+                try:
+                    parts = line.split(" ")
+                    line_no = int(parts[2].split(",")[0][1:])
+                except:
+                    line_no = 0
                 continue
 
-            if line.startswith("+") and not line.startswith("+++"):
+            # Skip diff headers
+            if line.startswith("+++") or line.startswith("---"):
+                continue
 
-                code = line[1:].strip()
+            # 🔴 REMOVED
+            if line.startswith("-"):
+                code = line[1:]
 
-                issue = detect_issue(code)
-                fix = suggest_fix(code, issue)
-                explanation = explain_fix(issue)
+                if code.strip() == "":
+                    code = "[empty line]"
 
                 results.append({
                     "file": filename,
                     "line": line_no,
-                    "issue": issue,
+                    "type": "REMOVED",
                     "code": code,
-                    "fix": fix,
-                    "explanation": explanation
+                    "issue": "Old logic removed",
+                    "fix": "Ensure removed logic is not required",
+                    "explanation": "Removing code may break existing functionality"
+                })
+
+            # 🟢 ADDED
+            elif line.startswith("+"):
+                code = line[1:]
+
+                if code.strip() == "":
+                    code = "[empty line]"
+
+                results.append({
+                    "file": filename,
+                    "line": line_no,
+                    "type": "ADDED",
+                    "code": code,
+                    "issue": "New logic added",
+                    "fix": "Verify compatibility with existing code",
+                    "explanation": "New code may introduce conflicts"
                 })
 
             line_no += 1
 
-    return results[:5]
-
-
-def detect_issue(code):
-
-    if "print(" in code:
-        return "Debug statement in code"
-
-    if "==" in code:
-        return "Possible comparison issue"
-
-    if "for" in code:
-        return "Loop logic modification"
-
-    if "=" in code:
-        return "Variable modification"
-
-    return "General code change"
-
-
-def suggest_fix(code, issue):
-
-    if issue == "Debug statement in code":
-        return "Remove print() in production"
-
-    if issue == "Possible comparison issue":
-        return "Check equality condition"
-
-    if issue == "Loop logic modification":
-        return "Verify loop logic"
-
-    if issue == "Variable modification":
-        return "Ensure consistency across branches"
-
-    return "Review manually"
-
-
-def explain_fix(issue):
-
-    explanations = {
-        "Debug statement in code":
-            "Debug logs should not be in production",
-
-        "Possible comparison issue":
-            "Wrong comparisons may break logic",
-
-        "Loop logic modification":
-            "Loops may cause unexpected behavior",
-
-        "Variable modification":
-            "Variable changes may cause merge conflicts",
-
-        "General code change":
-            "Code updated, review needed"
-    }
-
-    return explanations.get(issue, "Review required")
+    return results
