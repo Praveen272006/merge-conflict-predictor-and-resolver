@@ -1,41 +1,86 @@
+import re
+
+
+# =========================
+# TOKENIZER
+# =========================
+def tokenize(line):
+    return re.findall(r'\w+', line)
+
+
+# =========================
+# VARIABLE MAPPING
+# =========================
+def detect_variable_mapping(a, b):
+    tokens_a = tokenize(a)
+    tokens_b = tokenize(b)
+
+    mapping = {}
+
+    for x, y in zip(tokens_a, tokens_b):
+        if x != y:
+            mapping[x] = y
+
+    return mapping
+
+
+# =========================
+# APPLY MAPPING
+# =========================
+def apply_mapping(line, mapping):
+    for k, v in mapping.items():
+        line = re.sub(rf"\b{k}\b", v, line)
+    return line
+
+
+# =========================
+# SMART MERGE (LINE)
+# =========================
 def smart_merge(line_a, line_b):
-    """
-    AI-based smart merge between two conflicting lines
-    """
 
     a = line_a.strip()
     b = line_b.strip()
 
-    # Same → return
     if a == b:
         return a
 
-    # Prefer meaningful variable names
-    keywords = ["quantity", "total", "amount", "price"]
+    mapping = detect_variable_mapping(a, b)
 
-    for k in keywords:
-        if k in a and k not in b:
-            return a
-        if k in b and k not in a:
-            return b
-
-    # Replace abbreviations
-    if "qty" in b:
-        return b.replace("qty", "quantity")
-    if "qty" in a:
-        return a.replace("qty", "quantity")
-
-    # Prefer longer line (more descriptive)
-    return a if len(a) > len(b) else b
+    if len(a) < len(b):
+        return apply_mapping(a, mapping)
+    else:
+        return apply_mapping(b, mapping)
 
 
+# =========================
+# BLOCK MERGE
+# =========================
+def merge_blocks(old_block, new_block):
+
+    merged_lines = []
+    max_len = max(len(old_block), len(new_block))
+
+    for i in range(max_len):
+
+        old_line = old_block[i] if i < len(old_block) else ""
+        new_line = new_block[i] if i < len(new_block) else ""
+
+        if old_line and new_line:
+            merged_lines.append(smart_merge(old_line, new_line))
+        elif new_line:
+            merged_lines.append(new_line)
+        else:
+            merged_lines.append(old_line)
+
+    return "\n".join(merged_lines)
+
+
+# =========================
+# MAIN ENGINE
+# =========================
 def generate_resolution(commit_data):
-    """
-    Generate clean AI-based conflict resolution
-    """
 
     resolutions = []
-
     files = commit_data.get("files", [])
 
     for file in files:
@@ -49,71 +94,67 @@ def generate_resolution(commit_data):
         lines = patch.split("\n")
 
         line_number = 0
-        prev_removed = None
+        old_block = []
+        new_block = []
+        block_start = 0
 
         for line in lines:
 
-            # Detect hunk start
+            # HUNK HEADER
             if line.startswith("@@"):
                 parts = line.split(" ")
-                new_file_info = parts[2]  # +start,count
-                line_number = int(new_file_info.split(",")[0].replace("+", ""))
+                new_info = parts[2]
+                line_number = int(new_info.split(",")[0].replace("+", ""))
+
+                old_block = []
+                new_block = []
                 continue
 
-            # -------------------------
-            # REMOVED LINE
-            # -------------------------
+            # REMOVED
             if line.startswith("-") and not line.startswith("---"):
-                removed_code = line[1:].strip()
+                if not old_block:
+                    block_start = line_number
+                old_block.append(line[1:].strip())
 
-                if removed_code == "":
-                    removed_code = "whitespace"
-
-                prev_removed = removed_code
-
-            # -------------------------
-            # ADDED LINE
-            # -------------------------
+            # ADDED
             elif line.startswith("+") and not line.startswith("+++"):
-                added_code = line[1:].strip()
+                if not new_block:
+                    block_start = line_number
+                new_block.append(line[1:].strip())
 
-                if added_code == "":
-                    added_code = "whitespace"
+            else:
+                # PROCESS BLOCK
+                if old_block or new_block:
 
-                # 🔥 IF BOTH EXIST → CONFLICT → MERGE
-                if prev_removed and prev_removed != "whitespace" and added_code != "whitespace":
-
-                    merged_code = smart_merge(prev_removed, added_code)
+                    merged = merge_blocks(old_block, new_block)
 
                     resolutions.append({
                         "file": filename,
-                        "line": line_number,
+                        "line": block_start,
                         "type": "MERGED",
                         "issue": "Conflicting logic",
-                        "code": merged_code,
-                        "fix": f"Solution: {merged_code}",
-                        "explanation": "AI compared both versions and selected the best, most meaningful code"
+                        "code": merged,
+                        "fix": merged,
+                        "explanation": "AI merged conflicting changes intelligently"
                     })
 
-                else:
-                    # Normal addition
-                    resolutions.append({
-                        "file": filename,
-                        "line": line_number,
-                        "type": "ADDED",
-                        "issue": "New logic added",
-                        "code": added_code,
-                        "fix": "Verify compatibility",
-                        "explanation": "New code introduced"
-                    })
+                    old_block = []
+                    new_block = []
 
-                prev_removed = None
-
-            # -------------------------
-            # NORMAL LINE
-            # -------------------------
-            else:
                 line_number += 1
-                prev_removed = None
+
+        # LAST BLOCK
+        if old_block or new_block:
+            merged = merge_blocks(old_block, new_block)
+
+            resolutions.append({
+                "file": filename,
+                "line": block_start,
+                "type": "MERGED",
+                "issue": "Conflicting logic",
+                "code": merged,
+                "fix": merged,
+                "explanation": "AI merged conflicting changes intelligently"
+            })
 
     return resolutions
