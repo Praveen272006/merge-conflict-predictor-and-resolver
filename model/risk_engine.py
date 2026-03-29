@@ -1,12 +1,12 @@
 def predict_risk(features):
 
-    CF = features.get("commit_frequency", 0)
-    CD = features.get("change_density", 0)
-    FMF = features.get("file_modification_frequency", 0)
-    RA = features.get("repository_activity", 0)
-    DI = features.get("developer_interaction", 0)
-
-    score = (CF * 0.2) + (CD * 0.3) + (FMF * 0.2) + (RA * 0.1) + (DI * 0.2)
+    score = (
+        features["commit_frequency"] * 0.2 +
+        features["change_density"] * 0.3 +
+        features["file_modification_frequency"] * 0.2 +
+        features["repository_activity"] * 0.1 +
+        features["developer_interaction"] * 0.2
+    )
 
     prob = min(score / 100, 1.0)
 
