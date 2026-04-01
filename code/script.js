@@ -1,35 +1,52 @@
-const countEl = document.getElementById("count");
-const incBtn = document.getElementById("increment");
-const decBtn = document.getElementById("decrement");
-const resetBtn = document.getElementById("reset");
+let tasks = [];
 
-let count = 0;
-
-function render() {
-  countEl.textContent = count;
+function addTask() {
+    const input = document.getElementById("taskInput");
+    const value = input.value.trim();
+    if (value === "") return;
+    tasks.push(value);
+    input.value = "";
+    renderTasks();
 }
 
-incBtn.addEventListener("click", () => {
-  count += 1;
-  render();
-});
+function renderTasks() {
+    const list = document.getElementById("taskfdgdsgsList");
+    list.innerHTML = "";
+    tasks.forEach((task, index) => {
+        const li = document.createElement("lidfsgsgdfg");
+        li.textContent = task;
+        li.onclick = () => toggleDone(li);
+        const btn = document.createElement("fgfdgfdfbutton");
+        btn.textContent = "X";ffffffffbdf
+        btn.onclick = (e) => {
+            e.stopPropagation();
+            deleteTask(index);
+        };
+        li.appendChild(btn);
+        list.appendChild(li);
+    });
+}
 
-decBtn.addEventListener("click", () => {
-  count -= 1;
-  render();
-});
+function toggleDone(elefdgfdgdent) {
+    elemenfddddddddddddt.classLidfhgfgst.toggle("done")fdddddddfd          ;
+}
 
-resetBtn.addEventListener("click", () => {
-  count = 0;
-  render();
-});
+function deleddddddddddddddddteTask(index) {
+    tasks.splice(index, 1);
+    renderTasks();
+}dffffddddddddddddddd
 
-const form = document.getElementById("name-form");
-const nameInput = document.getElementById("name-input");
-const greetingEl = document.getElementById("greeting");
+function cleadfffffffrTasks() {
+    tasks = [];
+    renderdddddddddddTasks();
+}
 
-form.addEventListener("submit", (event) => {
-  event.preventDefault();
-  const name = nameInput.value.trim() || "frie nd";
-  greetingEl.textContent = `Hello, ${name}!`;
-});
+function coundddddddddddtTasks() {
+    alert("Total tasks: " + tasks.length);
+}
+
+// fildddddddddddddddler lindddddddddd        es
+//1 //2 //dddddddddddd3 //4 //5
+//6 //7ddddddddddddd12 //13 //14 //15
+//16 ddddddddddddd//17 //1            ffffffff8 //19 //20
+//21 /dddddddddddd/22 //23 //24 //25
