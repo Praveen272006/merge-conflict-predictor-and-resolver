@@ -10,14 +10,14 @@ function addTask() {
 }
 
 function renderTasks() {
-    const list = document.getElementById("taskfdgdsgsList");
+    const list = document.getElementById("taskList");
     list.innerHTML = "";
     tasks.forEach((task, index) => {
-        const li = document.createElement("lidfsgsgdfg");
+        const li = document.createElement("li");
         li.textContent = task;
         li.onclick = () => toggleDone(li);
-        const btn = document.createElement("fgfdgfdfbutton");
-        btn.textContent = "X";ffffffffbdf
+        const btn = document.createElement("button");
+        btn.textContent = "X";
         btn.onclick = (e) => {
             e.stopPropagation();
             deleteTask(index);
@@ -27,26 +27,144 @@ function renderTasks() {
     });
 }
 
-function toggleDone(elefdgfdgdent) {
-    elemenfddddddddddddt.classLidfhgfgst.toggle("done")fdddddddfd          ;
+function toggleDone(element) {
+    element.classList.toggle("done");
+}
+function addTask() {
+    const input = document.getElementById("taskInput");
+    const value = input.value.trim();
+    if (value === "") return;
+    tasks.push(value);
+    input.value = "";
+    renderTasks();
+}
+function addTask() {
+    const input = document.getElementById("taskInput");
+    const value = input.value.trim();
+    if (value === "") return;
+    tasks.push(value);
+    input.value = "";
+    renderTasks();
+}
+function addTask() {
+    const input = document.getElementById("taskInput");
+    const value = input.value.trim();
+    if (value === "") return;
+    tasks.push(value);
+    input.value = "";
+    renderTasks();
+}
+function addTask() {
+    const input = document.getElementById("taskInput");
+    const value = input.value.trim();
+    if (value === "") return;
+    tasks.push(value);
+    input.value = "";
+    renderTasks();
+}
+function addTask() {
+    const input = document.getElementById("taskInput");
+    const value = input.value.trim();
+    if (value === "") return;
+    tasks.push(value);
+    input.value = "";
+    renderTasks();
+}
+function addTask() {
+    const input = document.getElementById("taskInput");
+    const value = input.value.trim();
+    if (value === "") return;
+    tasks.push(value);
+    input.value = "";
+    renderTasks();
+}
+function addTask() {
+    const input = document.getElementById("taskInput");
+    const value = input.value.trim();
+    if (value === "") return;
+    tasks.push(value);
+    input.value = "";
+    renderTasks();
+}
+function addTask() {
+    const input = document.getElementById("taskInput");
+    const value = input.value.trim();
+    if (value === "") return;
+    tasks.push(value);
+    input.value = "";
+    renderTasks();
+}
+function addTask() {
+    const input = document.getElementById("taskInput");
+    const value = input.value.trim();
+    if (value === "") return;
+    tasks.push(value);
+    input.value = "";
+    renderTasks();
+}
+function addTask() {
+    const input = document.getElementById("taskInput");
+    const value = input.value.trim();
+    if (value === "") return;
+    tasks.push(value);
+    input.value = "";
+    renderTasks();
 }
 
-function deleddddddddddddddddteTask(index) {
+function deleteTask(index) {
     tasks.splice(index, 1);
     renderTasks();
-}dffffddddddddddddddd
-
-function cleadfffffffrTasks() {
-    tasks = [];
-    renderdddddddddddTasks();
 }
 
-function coundddddddddddtTasks() {
+function clearTasks() {
+    tasks = [];
+    renderTasks();
+}
+
+function countTasks() {
     alert("Total tasks: " + tasks.length);
 }
 
-// fildddddddddddddddler lindddddddddd        es
-//1 //2 //dddddddddddd3 //4 //5
-//6 //7ddddddddddddd12 //13 //14 //15
-//16 ddddddddddddd//17 //1            ffffffff8 //19 //20
-//21 /dddddddddddd/22 //23 //24 //25
+// filler lines
+//1 //2 //3 //4 //5
+//6 //7 //8 //9 //10
+//11 //12 //13 //14 //15
+//16 //17 //18 //19 //20
+//21 //22 //23 //24 //25
+
+
+function addTask() {
+    const input = document.getElementById("taskInput");
+    const value = input.value.trim();
+    if (value === "") return;
+    tasks.push(value);
+    input.value = "";
+    renderTasks();
+}
+
+function addTask() {
+    const input = document.getElementById("taskInput");
+    const value = input.value.trim();
+    if (value === "") return;
+    tasks.push(value);
+    input.value = "";
+    renderTasks();
+}
+
+function addTask() {
+    const input = document.getElementById("taskInput");
+    const value = input.value.trim();
+    if (value === "") return;
+    tasks.push(value);
+    input.value = "";
+    renderTasks();
+}
+
+function addTask() {
+    const input = document.getElementById("taskInput");
+    const value = input.value.trim();
+    if (value === "") return;
+    tasks.push(value);
+    input.value = "";
+    renderTasks();
+}

@@ -1,40 +1,91 @@
 body {
-    font-family: Ar        fbfb    ial, sans-se   fbdsbsgbgd     rif;
-    margin: 0;fdfd
-    background: #f4f    4f4;
+    font-family: Arial, sans-serif;
+    margin: 0;
+    background: #f4f4f4;
 }
 header {
-    backgrfdgfdound: #3 dvdxvf33;
-    cofdgdglor: #fff;
-    tegdfgdfsgxt-align: cefdsbgfsnter;
-    padddfgdsffing: 15px;
+    background: #333;
+    color: #fff;
+    text-align: center;
+    padding: 15px;
 }
 main {
-    padgsdggding: 20px;
+    padding: 20px;
 }
 .input-section {
-    mardfgfdgin-bottom: 15px;
+    margin-bottom: 15px;
 }
 input {
     padding: 10px;
-    widfdgfgth: 70%;
+    width: 70%;
 }
 button {
-    paddfdgdfging: 10px;
-    mardsggdsggin-left: 5px;
-    curfdgdsor: pointer;
+    padding: 10px;
+    margin-left: 5px;
+    cursor: pointer;
 }
 ul {
-    list-sdsgdsgtyle: none;
+    list-style: none;
     padding: 0;
 }
 li {
     background: #fff;
-    paddinfdgdfgdsg: 10px;
+    padding: 10px;
     margin: 5px 0;
     display: flex;
-    justifyfdgfds-content: space-between;
+    justify-content: space-between;
 }
+button {
+    padding: 10px;
+    margin-left: 5px;
+    cursor: pointer;
+}
+button {
+    padding: 10px;
+    margin-left: 5px;
+    cursor: pointer;
+}
+button {
+    padding: 10px;
+    margin-left: 5px;
+    cursor: pointer;
+}
+button {
+    padding: 10px;
+    margin-left: 5px;
+    cursor: pointer;
+}
+button {
+    padding: 10px;
+    margin-left: 5px;
+    cursor: pointer;
+}
+button {
+    padding: 10px;
+    margin-left: 5px;
+    cursor: pointer;
+}
+button {
+    padding: 10px;
+    margin-left: 5px;
+    cursor: pointer;
+}
+button {
+    padding: 10px;
+    margin-left: 5px;
+    cursor: pointer;
+}
+button {
+    padding: 10px;
+    margin-left: 5px;
+    cursor: pointer;
+}
+button {
+    padding: 10px;
+    margin-left: 5px;
+    cursor: pointer;
+}
+
 footer {
     text-align: center;
     padding: 10px;
@@ -51,3 +102,4 @@ footer {
  /*11*/ /*12*/ /*13*/ /*14*/ /*15*/
  /*16*/ /*17*/ /*18*/ /*19*/ /*20*/
  /*21*/ /*22*/ /*23*/ /*24*/ /*25*/
+ 

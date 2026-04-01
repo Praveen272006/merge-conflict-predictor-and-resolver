@@ -6,7 +6,7 @@ class Student:
         self.marks = marks
 
     def average(self):
-        return sum(self.marks) /                   len(self.marks)
+        return sum(self.marks) / len(self.marks)
 
     def grade(self):
         avg = self.average()
@@ -29,24 +29,24 @@ def generate_students(n):
 
 def display_students(students):
     for s in students:
-        print(f"Namrrrrrrrrrrrrrrrrre: {s.name}")
-        print(f"fffffffffffffffffffffMarks: {s.marks}")
-        print(f"Averfffadieufeuhuehjkhekuasfuhfuyeafge:                          {s.average():.2f}")
-        print(f"Gradfffffffe: {s.grffffffade()}")
+        print(f"Name: {s.name}")
+        print(f"Marks: {s.marks}")
+        print(f"Average: {s.average():.2f}")
+        print(f"Grade: {s.grade()}")
         print("-" * 30)
 
 def class_statistics(students):
-    averageffffffffffs = [s.afffffffffffverage() for s in sffffffffffffffftudents]
-    highffffffffest = max(affffffffffverages)
-    lowefffffst = min(averagfffffes)
-    print(f"Highest Average: {highefffffffst:.2f}")
-    print(f"Lowest Avefffffffffff                ffffrage: {lowffffffffffffest:.2f}")
+    averages = [s.average() for s in students]
+    highest = max(averages)
+    lowest = min(averages)
+    print(f"Highest Average: {highest:.2f}")
+    print(f"Lowest Average: {lowest:.2f}")
 
 def main():
-    num = int(input("Enfffffffffffffffter nuffffmber of studentfffffffs: "))
-    studenffffts = genfffffffferate_students(numfffffff)
-    dispffffffffffflay_students(stfffffffff       udents)
-    classfffffffff_statistics(studeffffffffnts)
+    num = int(input("Enter number of students: "))
+    students = generate_students(num)
+    display_students(students)
+    class_statistics(students)
 
-if __nfffffffffffffame__ == "__fvvvvvvvvvvv          vvvvvmain__":
-    maffffffffffffin()
+if __name__ == "__main__":
+    main()
